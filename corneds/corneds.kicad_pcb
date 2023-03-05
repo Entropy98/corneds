@@ -2933,7 +2933,7 @@
 
   (footprint "Key_Switches:Kailh_socket_MX" (layer "F.Cu")
     (tedit 5DD4FB17) (tstamp 85740e85-7449-4fc2-a265-26a36347b3ae)
-    (at 66.7 107.34 -15)
+    (at 64.97 106.92 -15)
     (descr "MX-style keyswitch with Kailh socket mount")
     (tags "MX,cherry,gateron,kailh,pg1511,socket")
     (property "Sheetfile" "corneds.kicad_sch")
@@ -5900,7 +5900,7 @@
 
   (footprint "Diode_SMD:D_1206_3216Metric" (layer "B.Cu")
     (tedit 5F68FEF0) (tstamp 1f8c0307-d25e-4e2b-9625-9e81fa04403f)
-    (at 58.058163 109.187704 75)
+    (at 56.515 108.585 75)
     (descr "Diode SMD 1206 (3216 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: http://www.tortai-tech.com/upload/download/2011102023233369053.pdf), generated with kicad-footprint-generator")
     (tags "diode")
     (property "Sheetfile" "corneds.kicad_sch")
