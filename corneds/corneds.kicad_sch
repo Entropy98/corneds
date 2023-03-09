@@ -2012,7 +2012,7 @@
   (symbol (lib_id "Connector:TestPoint") (at 274.32 78.74 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 0abfc9bc-cfd1-4238-99b4-f5788aa9a167)
-    (property "Reference" "DBG?" (id 0) (at 276.86 74.1679 0)
+    (property "Reference" "DBG11" (id 0) (at 276.86 74.1679 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "RX" (id 1) (at 276.86 76.7079 0)
@@ -2174,7 +2174,7 @@
   (symbol (lib_id "Connector:TestPoint") (at 274.32 68.58 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 1a72f5d6-44ee-46ae-8a18-fbbb82588964)
-    (property "Reference" "DBG?" (id 0) (at 276.86 64.0079 0)
+    (property "Reference" "DBG9" (id 0) (at 276.86 64.0079 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "5V" (id 1) (at 276.86 66.5479 0)
@@ -2503,7 +2503,7 @@
   (symbol (lib_id "Connector:TestPoint") (at 274.32 73.66 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 4cfee851-0cc5-4d3d-a57d-b2108e11a482)
-    (property "Reference" "DBG?" (id 0) (at 276.86 69.0879 0)
+    (property "Reference" "DBG10" (id 0) (at 276.86 69.0879 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "TX" (id 1) (at 276.86 71.6279 0)
@@ -2722,7 +2722,7 @@
   (symbol (lib_id "Connector:TestPoint") (at 274.32 58.42 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 5c744d00-6e74-484c-b63b-3b58dd05dd79)
-    (property "Reference" "DBG?" (id 0) (at 276.86 53.8479 0)
+    (property "Reference" "DBG7" (id 0) (at 276.86 53.8479 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "GND" (id 1) (at 276.86 56.3879 0)
@@ -4069,7 +4069,7 @@
   (symbol (lib_id "Connector:TestPoint") (at 274.32 83.82 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid f9587540-9e33-42f9-8e4e-2bbaf53fb241)
-    (property "Reference" "DBG?" (id 0) (at 276.86 79.2479 0)
+    (property "Reference" "DBG12" (id 0) (at 276.86 79.2479 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "RTS" (id 1) (at 276.86 81.7879 0)
@@ -4218,7 +4218,7 @@
   (symbol (lib_id "Connector:TestPoint") (at 274.32 63.5 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid feeb044e-58ef-4711-90fe-4a14fad0b279)
-    (property "Reference" "DBG?" (id 0) (at 276.86 58.9279 0)
+    (property "Reference" "DBG8" (id 0) (at 276.86 58.9279 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "CTS" (id 1) (at 276.86 61.4679 0)
@@ -4416,23 +4416,23 @@
     (path "/a5bbbd64-773b-472e-9614-3b6458eaffbf"
       (reference "DBG6") (unit 1) (value "RTS") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
     )
-    (path "/0abfc9bc-cfd1-4238-99b4-f5788aa9a167"
-      (reference "DBG?") (unit 1) (value "RX") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
-    )
-    (path "/1a72f5d6-44ee-46ae-8a18-fbbb82588964"
-      (reference "DBG?") (unit 1) (value "5V") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
-    )
-    (path "/4cfee851-0cc5-4d3d-a57d-b2108e11a482"
-      (reference "DBG?") (unit 1) (value "TX") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
-    )
     (path "/5c744d00-6e74-484c-b63b-3b58dd05dd79"
-      (reference "DBG?") (unit 1) (value "GND") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
-    )
-    (path "/f9587540-9e33-42f9-8e4e-2bbaf53fb241"
-      (reference "DBG?") (unit 1) (value "RTS") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
+      (reference "DBG7") (unit 1) (value "GND") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
     )
     (path "/feeb044e-58ef-4711-90fe-4a14fad0b279"
-      (reference "DBG?") (unit 1) (value "CTS") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
+      (reference "DBG8") (unit 1) (value "CTS") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
+    )
+    (path "/1a72f5d6-44ee-46ae-8a18-fbbb82588964"
+      (reference "DBG9") (unit 1) (value "5V") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
+    )
+    (path "/4cfee851-0cc5-4d3d-a57d-b2108e11a482"
+      (reference "DBG10") (unit 1) (value "TX") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
+    )
+    (path "/0abfc9bc-cfd1-4238-99b4-f5788aa9a167"
+      (reference "DBG11") (unit 1) (value "RX") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
+    )
+    (path "/f9587540-9e33-42f9-8e4e-2bbaf53fb241"
+      (reference "DBG12") (unit 1) (value "RTS") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x01_P2.54mm_Vertical")
     )
     (path "/b0c15786-e0b2-4699-9893-07fcd4088d87"
       (reference "GP1") (unit 1) (value "gnd") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
