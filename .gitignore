@@ -1,1 +1,5 @@
 */corneds-backups/*
+*.gbr
+*.zip
+*.gbrjob
+*.drl
