@@ -10,4 +10,10 @@ add_executable(corneds
   src/main.c
 )
 
+target_sources(corneds PUBLIC
+  src/timeslice.c
+)
+
+target_include_directories(corneds PUBLIC inc)
+
 target_link_libraries(corneds pico_stdlib)
