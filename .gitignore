@@ -3,3 +3,5 @@
 *.zip
 *.gbrjob
 *.drl
+*/build/*
+.cache
