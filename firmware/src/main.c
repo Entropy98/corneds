@@ -16,15 +16,14 @@ uint8_t led_toggle = 1;
 int main(void) {
 
   gpio_init(BOARD_LED);
+  gpio_init(4);
   gpio_set_dir(BOARD_LED, GPIO_OUT);
+  gpio_set_dir(4, GPIO_OUT);
   gpio_put(BOARD_LED, 0);
+  gpio_put(4, 0);
 
   while(1) {
     update_time_slices();
-
-    if(get_us_slice()) {
-      clear_us_slice();
-    }
 
     if(get_ms_slice()) {
       clear_ms_slice();

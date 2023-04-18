@@ -12,13 +12,11 @@
 
 void update_time_slices();
 
-void clear_us_slice();
 void clear_ms_slice();
 void clear_10ms_slice();
 void clear_100ms_slice();
 void clear_s_slice();
 
-uint8_t get_us_slice();
 uint8_t get_ms_slice();
 uint8_t get_10ms_slice();
 uint8_t get_100ms_slice();

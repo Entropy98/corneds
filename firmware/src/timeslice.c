@@ -13,30 +13,26 @@
 #include "timeslice.h"
 
 // rp2040 defaults to a 6MHz ring oscillator clock
-#define TICKS_PER_US      6
-#define TICKS_PER_MS      6000
-#define TICKS_PER_10MS    60000
-#define TICKS_PER_100MS   600000
-#define TICKS_PER_S       6000000
+// Values found through experimentation
+#define TICKS_PER_MS      837
+#define TICKS_PER_10MS    8560
+#define TICKS_PER_100MS   85608
+#define TICKS_PER_S       822435
 
-#define US_SLICE      0x01
-#define MS_SLICE      0x02
-#define MS_10_SLICE   0x04
-#define MS_100_SLICE  0x08
-#define S_SLICE       0x10
+#define MS_SLICE      0x01
+#define MS_10_SLICE   0x02
+#define MS_100_SLICE  0x04
+#define S_SLICE       0x08
 
-#define US_SLICE_MASK      0xFE
-#define MS_SLICE_MASK      0xFD
-#define MS_10_SLICE_MASK   0xFB
-#define MS_100_SLICE_MASK  0xF7
-#define S_SLICE_MASK       0xEF
-
+#define MS_SLICE_MASK      0xFE
+#define MS_10_SLICE_MASK   0xFD
+#define MS_100_SLICE_MASK  0xFB
+#define S_SLICE_MASK       0xF7
 typedef struct slice_timers {
   uint32_t  s_timer;
   uint32_t  ms_100_timer;
   uint16_t  ms_10_timer;
   uint16_t  ms_timer;
-  uint8_t   us_timer;
 }slice_timers_t;
 
 static slice_timers_t timers;
@@ -47,13 +43,6 @@ static uint8_t led_toggle = 0;
  * \brief updates the time slices. Meant to be called every tick
  */
 void update_time_slices() {
-  if(timers.us_timer >= TICKS_PER_US) {
-    time_slices |= US_SLICE;
-    timers.us_timer = 0;
-  }
-  else {
-    timers.us_timer++;
-  }
   if(timers.ms_timer >= TICKS_PER_MS) {
     time_slices |= MS_SLICE;
     timers.ms_timer = 0;
@@ -63,6 +52,7 @@ void update_time_slices() {
   }
   if(timers.ms_10_timer >= TICKS_PER_10MS) {
     gpio_put(25, led_toggle);
+    gpio_put(4, led_toggle);
     led_toggle = led_toggle ? 0 : 1;
     time_slices |= MS_10_SLICE;
     timers.ms_10_timer = 0;
@@ -84,14 +74,6 @@ void update_time_slices() {
   else {
     timers.s_timer++;
   }
-}
-
-/*
- * \fn void clear_us_slice()
- * \brief resets us slice
- */
-void clear_us_slice() {
-  time_slices &= US_SLICE_MASK;
 }
 
 /*
@@ -124,16 +106,6 @@ void clear_100ms_slice() {
  */
 void clear_s_slice() {
   time_slices &= MS_SLICE_MASK;
-}
-
-/*
- * \fn uint8_t get_us_slice()
- * \brief checks if the us slice is high
- *
- * \returns 0 if low
- */
-uint8_t get_us_slice() {
-  return time_slices & US_SLICE_MASK;
 }
 
 /*
