@@ -10,6 +10,10 @@ add_executable(corneds
   src/main.c
 )
 
+target_compile_options(corneds PUBLIC
+  -g
+)
+
 target_sources(corneds PUBLIC
   src/timeslice.c
 )

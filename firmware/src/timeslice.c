@@ -37,7 +37,18 @@ typedef struct slice_timers {
 
 static slice_timers_t timers;
 static uint8_t time_slices = 0;
-static uint8_t led_toggle = 0;
+
+/*
+ * \fn void init_time_slices()
+ * \brief initializes the time slices.
+ */
+void init_time_slices() {
+  timers.ms_timer = 0;
+  timers.ms_10_timer = 0;
+  timers.ms_100_timer = 0;
+  timers.s_timer = 0;
+}
+
 /*
  * \fn void update_time_slices()
  * \brief updates the time slices. Meant to be called every tick
@@ -50,16 +61,15 @@ void update_time_slices() {
   else {
     timers.ms_timer++;
   }
+
   if(timers.ms_10_timer >= TICKS_PER_10MS) {
-    gpio_put(25, led_toggle);
-    gpio_put(4, led_toggle);
-    led_toggle = led_toggle ? 0 : 1;
     time_slices |= MS_10_SLICE;
     timers.ms_10_timer = 0;
   }
   else {
     timers.ms_10_timer++;
   }
+
   if(timers.ms_100_timer >= TICKS_PER_100MS) {
     time_slices |= MS_100_SLICE;
     timers.ms_100_timer = 0;
@@ -67,6 +77,7 @@ void update_time_slices() {
   else {
     timers.ms_100_timer++;
   }
+
   if(timers.s_timer >= TICKS_PER_S) {
     time_slices |= S_SLICE;
     timers.s_timer = 0;
@@ -105,7 +116,7 @@ void clear_100ms_slice() {
  * \brief resets s slice
  */
 void clear_s_slice() {
-  time_slices &= MS_SLICE_MASK;
+  time_slices &= S_SLICE_MASK;
 }
 
 /*
@@ -115,7 +126,7 @@ void clear_s_slice() {
  * \returns 0 if low
  */
 uint8_t get_ms_slice() {
-  return time_slices & MS_SLICE_MASK;
+  return time_slices & MS_SLICE;
 }
 
 /*
@@ -125,7 +136,7 @@ uint8_t get_ms_slice() {
  * \returns 0 if low
  */
 uint8_t get_10ms_slice() {
-  return time_slices & MS_10_SLICE_MASK;
+  return time_slices & MS_10_SLICE;
 }
 
 /*
@@ -135,7 +146,7 @@ uint8_t get_10ms_slice() {
  * \returns 0 if low
  */
 uint8_t get_100ms_slice() {
-  return time_slices & MS_100_SLICE_MASK;
+  return time_slices & MS_100_SLICE;
 }
 
 /*
@@ -145,7 +156,7 @@ uint8_t get_100ms_slice() {
  * \returns 0 if low
  */
 uint8_t get_s_slice() {
-  return time_slices & S_SLICE_MASK;
+  return time_slices & S_SLICE;
 }
 
 #endif //_SRC_TIMESLICE_C

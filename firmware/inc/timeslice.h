@@ -10,6 +10,7 @@
 
 #include "pico/stdlib.h"
 
+void init_time_slices();
 void update_time_slices();
 
 void clear_ms_slice();
