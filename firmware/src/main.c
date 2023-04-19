@@ -36,7 +36,7 @@ int main(void) {
     }
 
     if(get_10ms_slice() != 0) {
-      send_hid_report(key);
+      send_hid_report(0);
       clear_10ms_slice();
     }
 
