@@ -1,7 +1,7 @@
 /*
  * \file time.c
  * \author Harper Weigle
- * \date Apr 15 2023
+ * \date Apr 18 2023
  * \brief timing functions to support backbone of time slice architecture
  */
 

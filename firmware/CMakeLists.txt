@@ -15,9 +15,11 @@ target_compile_options(corneds PUBLIC
 )
 
 target_sources(corneds PUBLIC
+  src/hid_task.c
   src/timeslice.c
+  src/usb_descriptors.c
 )
 
 target_include_directories(corneds PUBLIC inc)
 
-target_link_libraries(corneds pico_stdlib)
+target_link_libraries(corneds pico_stdlib tinyusb_device tinyusb_board)
