@@ -76,6 +76,6 @@ keymap_t lowered_map_l = {{ HID_KEY_ESCAPE,       HID_KEY_F1,   HID_KEY_F2,   HI
                           { HID_KEY_NONE,         HID_KEY_NONE, HID_KEY_NONE, HID_KEY_GUI_LEFT, MOD_KEY,            HID_KEY_SPACE}};
 
 void init_keys();
-keycode_t* get_keypress();
+keycode_t** get_keypress();
 
 #endif //_INC_KEYMAP_H
