@@ -24,8 +24,7 @@ int main(void) {
   init_time_slices();
   board_init();
   tusb_init();
-
-  uint8_t led_toggle = 1;
+  init_keys();
 
   while(1) {
     update_time_slices();
@@ -46,8 +45,7 @@ int main(void) {
     }
 
     if(get_s_slice() != 0) {
-      gpio_put(25, led_toggle);
-      led_toggle = led_toggle ? 0 : 1;
+      gpio_put(25, 0);
       clear_s_slice();
     }
 

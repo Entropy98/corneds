@@ -14,6 +14,7 @@ add_executable(${EXEC_NAME}
 
 target_compile_options(${EXEC_NAME} PUBLIC
   -g
+  -O0
 )
 
 target_sources(${EXEC_NAME} PUBLIC

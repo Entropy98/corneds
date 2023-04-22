@@ -14,38 +14,43 @@
 
 #define NUM_COLS 6
 #define NUM_ROWS 3
-#define NUM_KEYS 50
+#define KEY_BUFFER_SIZE 50
 
-static uint8_t key_buffer[NUM_KEYS];
+#define ROW0_MASK 0x04
+#define ROW1_MASK 0x08
+#define ROW2_MASK 0x10
+#define ROW3_MASK 0x20
+
+static uint8_t key_buffer[KEY_BUFFER_SIZE];
 static uint8_t key_buffer_head = 0;
 static uint8_t key_buffer_foot = 0;
 static bool keys_initialized = false;
-static uint8_t rows[NUM_ROWS] = {ROW0, ROW1, ROW2};
+static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK};
 static uint8_t cols[NUM_COLS] = {COL0, COL1, COL2, COL3, COL4, COL5};
 
 static keymap_t normal_map_r = {{ HID_KEY_Y,    HID_KEY_U,    HID_KEY_I,     HID_KEY_O,      HID_KEY_P,         HID_KEY_BACKSPACE},
-                         { HID_KEY_H,    HID_KEY_J,    HID_KEY_K,     HID_KEY_L,      HID_KEY_SEMICOLON, MACRO_QUOTE},
-                         { HID_KEY_N,    HID_KEY_M,    HID_KEY_COMMA, HID_KEY_PERIOD, HID_KEY_SLASH,     HID_KEY_SHIFT_RIGHT}};
+                                { HID_KEY_H,    HID_KEY_J,    HID_KEY_K,     HID_KEY_L,      HID_KEY_SEMICOLON, HID_KEY_APOSTROPHE},
+                                { HID_KEY_N,    HID_KEY_M,    HID_KEY_COMMA, HID_KEY_PERIOD, HID_KEY_SLASH,     HID_KEY_SHIFT_RIGHT}};
 
 static keymap_t raised_map_r = {{ MACRO_CARET,       MACRO_AMPERSAND,       MACRO_ASTRISK, MACRO_PARENTHESIS_LEFT, MACRO_PARENTHESIS_RIGHT, HID_KEY_DELETE},
-                         { HID_KEY_6,         HID_KEY_7,             HID_KEY_8,     HID_KEY_9,              HID_KEY_0,               MACRO_COLON},
-                         { MACRO_CURLY_RIGHT, HID_KEY_BRACKET_RIGHT, HID_KEY_EQUAL, HID_KEY_VOLUME_DOWN,    HID_KEY_VOLUME_UP,       HID_KEY_CONTROL_RIGHT}};
+                                { HID_KEY_6,         HID_KEY_7,             HID_KEY_8,     HID_KEY_9,              HID_KEY_0,               MACRO_COLON},
+                                { MACRO_CURLY_RIGHT, HID_KEY_BRACKET_RIGHT, HID_KEY_EQUAL, HID_KEY_VOLUME_DOWN,    HID_KEY_VOLUME_UP,       HID_KEY_CONTROL_RIGHT}};
 
 static keymap_t lowered_map_r = {{ HID_KEY_F6,         HID_KEY_F7,         HID_KEY_F8,       HID_KEY_F9,          HID_KEY_F10,  HID_KEY_INSERT},
-                          { HID_KEY_ARROW_LEFT, HID_KEY_ARROW_DOWN, HID_KEY_ARROW_UP, HID_KEY_ARROW_RIGHT, MACRO_PIPE,   HID_KEY_F11},
-                          { HID_KEY_MINUS,      MACRO_PLUS,         HID_KEY_NONE,     HID_KEY_NONE,        HID_KEY_NONE, HID_KEY_F12}};
+                                 { HID_KEY_ARROW_LEFT, HID_KEY_ARROW_DOWN, HID_KEY_ARROW_UP, HID_KEY_ARROW_RIGHT, MACRO_PIPE,   HID_KEY_F11},
+                                 { HID_KEY_MINUS,      MACRO_PLUS,         HID_KEY_NONE,     HID_KEY_NONE,        HID_KEY_NONE, HID_KEY_F12}};
 
 static keymap_t normal_map_l = {{ HID_KEY_ESCAPE,       HID_KEY_Q,    HID_KEY_W,    HID_KEY_E,        HID_KEY_R, HID_KEY_T},
-                         { HID_KEY_CONTROL_LEFT, HID_KEY_A,    HID_KEY_S,    HID_KEY_D,        HID_KEY_F, HID_KEY_G},
-                         { HID_KEY_SHIFT_LEFT,   HID_KEY_Z,    HID_KEY_X,    HID_KEY_C,        HID_KEY_V, HID_KEY_B}};
+                                { HID_KEY_CONTROL_LEFT, HID_KEY_A,    HID_KEY_S,    HID_KEY_D,        HID_KEY_F, HID_KEY_G},
+                                { HID_KEY_SHIFT_LEFT,   HID_KEY_Z,    HID_KEY_X,    HID_KEY_C,        HID_KEY_V, HID_KEY_B}};
 
 static keymap_t raised_map_l = {{ HID_KEY_ESCAPE,     MACRO_EXCLAMATION_POINT, MACRO_AT,     MACRO_HASHTAG,    MACRO_DOLLAR_SIGN,    MACRO_PERCENT},
-                         { HID_KEY_TAB,        HID_KEY_1,               HID_KEY_2,    HID_KEY_3,        HID_KEY_4,            HID_KEY_5},
-                         { HID_KEY_SHIFT_LEFT, HID_KEY_BACKSLASH,       MACRO_TILDE,  HID_KEY_GRAVE,    HID_KEY_BRACKET_LEFT, MACRO_CURLY_LEFT}};
+                                { HID_KEY_TAB,        HID_KEY_1,               HID_KEY_2,    HID_KEY_3,        HID_KEY_4,            HID_KEY_5},
+                                { HID_KEY_SHIFT_LEFT, HID_KEY_BACKSLASH,       MACRO_TILDE,  HID_KEY_GRAVE,    HID_KEY_BRACKET_LEFT, MACRO_CURLY_LEFT}};
 
 static keymap_t lowered_map_l = {{ HID_KEY_ESCAPE,       HID_KEY_F1,   HID_KEY_F2,   HID_KEY_F3,       HID_KEY_F4,         HID_KEY_F5},
-                          { HID_KEY_CONTROL_LEFT, HID_KEY_HOME, HID_KEY_END,  HID_KEY_NONE,     HID_KEY_NONE,       HID_KEY_PAGE_UP},
-                          { HID_KEY_SHIFT_LEFT,   HID_KEY_NONE, HID_KEY_NONE, MACRO_LESS_THAN,  MACRO_GREATER_THAN, HID_KEY_PAGE_DOWN}};
+                                 { HID_KEY_CONTROL_LEFT, HID_KEY_HOME, HID_KEY_END,  HID_KEY_NONE,     HID_KEY_NONE,       HID_KEY_PAGE_UP},
+                                 { HID_KEY_SHIFT_LEFT,   HID_KEY_NONE, HID_KEY_NONE, MACRO_LESS_THAN,  MACRO_GREATER_THAN, HID_KEY_PAGE_DOWN}};
 
 
 /*
@@ -55,7 +60,7 @@ static keymap_t lowered_map_l = {{ HID_KEY_ESCAPE,       HID_KEY_F1,   HID_KEY_F
  */
 static bool key_buffer_full(){
   return (key_buffer_foot == (key_buffer_head - 1))
-      || ((key_buffer_foot == (NUM_KEYS - 1)) && (key_buffer_head == 0));
+      || ((key_buffer_foot == (KEY_BUFFER_SIZE - 1)) && (key_buffer_head == 0));
 }
 
 /*
@@ -79,7 +84,8 @@ static uint8_t key_buffer_push(uint8_t key){
   if(!key_buffer_full()) {
     key_buffer[key_buffer_foot] = key;
     key_buffer_foot++;
-    if(key_buffer_foot == NUM_KEYS) key_buffer_foot = 0;
+    if(key_buffer_foot == KEY_BUFFER_SIZE) key_buffer_foot = 0;
+    gpio_put(25, 1);
     retval = 0;
   }
 
@@ -97,10 +103,41 @@ static uint8_t key_buffer_pop(){
   if(!key_buffer_empty()) {
     keycode = key_buffer[key_buffer_head];
     key_buffer_head++;
-    if(key_buffer_head == NUM_KEYS) key_buffer_head = 0;
+    if(key_buffer_head == KEY_BUFFER_SIZE) key_buffer_head = 0;
   }
 
   return keycode;
+}
+
+/*
+ * \fn void populate_key_rows(uint8_t col, uint32_t keys_pressed, uint8_t mod)
+ * \brief local helper function for pushing all pressed rows given a column
+ * \param uint8_t col - column asserted at time of function call
+ * \param uint32_t keys_pressed - keys pressed at time of function call
+ * \param uint8_t - 1 if mod if pressed
+ */
+static void populate_key_rows(uint8_t col, uint32_t keys_pressed, uint8_t mod){
+  for(uint8_t row = 0; row < NUM_ROWS; row++){
+    if(key_buffer_full()) break;
+    if(mod){
+      if(keys_pressed & row_masks[row]){
+        #if KBDSIDE == right
+        key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
+        #elif KBDSIDE == left
+        key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
+        #endif //KBDSIDE
+      }
+    }
+    else{
+      if(keys_pressed & row_masks[row]){
+        #if KBDSIDE == right
+        key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
+        #elif KBDSIDE == left
+        key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
+        #endif //KBDSIDE
+      }
+    }
+  }
 }
 
 /*
@@ -118,6 +155,17 @@ void init_keys() {
   gpio_init(COL3);
   gpio_init(COL4);
   gpio_init(COL5);
+
+  gpio_set_function(ROW0, GPIO_FUNC_SIO);
+  gpio_set_function(ROW1, GPIO_FUNC_SIO);
+  gpio_set_function(ROW2, GPIO_FUNC_SIO);
+  gpio_set_function(ROW3, GPIO_FUNC_SIO);
+  gpio_set_function(COL0, GPIO_FUNC_SIO);
+  gpio_set_function(COL1, GPIO_FUNC_SIO);
+  gpio_set_function(COL2, GPIO_FUNC_SIO);
+  gpio_set_function(COL3, GPIO_FUNC_SIO);
+  gpio_set_function(COL4, GPIO_FUNC_SIO);
+  gpio_set_function(COL5, GPIO_FUNC_SIO);
 
   gpio_set_dir(ROW0, GPIO_IN);
   gpio_set_dir(ROW1, GPIO_IN);
@@ -137,51 +185,51 @@ void init_keys() {
  */
 void poll_keypresses() {
   uint8_t mod = 0;
-  uint8_t buf_full = key_buffer_full();
+  uint8_t buf_full = 0;
+  uint32_t keys_pressed = 0;
 
-  if(!buf_full){
-    gpio_put(COL4, 1);
-    mod = gpio_get(ROW3);
-    gpio_put(COL4, 0);
+  buf_full = key_buffer_full();
+  if(buf_full) return;
 
-    #if KBDSIDE == right
-    gpio_put(COL5, 1);
-    if(gpio_get(ROW3)) buf_full = key_buffer_push(HID_KEY_ENTER);
-    gpio_put(COL5, 0);
-    if(!buf_full){
-      gpio_put(COL3, 1);
-      if(gpio_get(ROW3)) buf_full = key_buffer_push(HID_KEY_ALT_RIGHT);
-      gpio_put(COL3, 0);
-    }
-    #endif //KBDSIDE == right
+  gpio_put(COL4, 1);
+  keys_pressed = gpio_get_all();
+  mod = keys_pressed & ROW3_MASK ? 1 : 0;
+  populate_key_rows(4, keys_pressed, mod);
+  gpio_put(COL4, 0);
 
-    #if KBDSIDE == left
-    gpio_put(COL5, 1);
-    if(gpio_get(ROW3)) buf_full = key_buffer_push(HID_KEY_SPACE);
-    gpio_put(COL5, 0);
-    if(!buf_full){
-      gpio_put(COL3, 1);
-      if(gpio_get(ROW3)) buf_full = key_buffer_push(HID_KEY_GUI_LEFT);
-      gpio_put(COL3, 0);
-    }
-    #endif //KDBSIDE == left
-  }
+  buf_full = key_buffer_full();
+  if(buf_full) return;
 
-  for(uint8_t col=0; col < NUM_COLS; col++){
-    if(buf_full) break;
+  gpio_put(COL5, 1);
+  keys_pressed = gpio_get_all();
+  #if KBDSIDE == right
+  if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ENTER);
+  #elif KBDSIDE == left
+  if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_SPACE);
+  #endif //KBDSIDE
+  populate_key_rows(5, keys_pressed, mod);
+  gpio_put(COL5, 0);
+
+  buf_full = key_buffer_full();
+  if(buf_full) return;
+
+  gpio_put(COL3, 1);
+  keys_pressed = gpio_get_all();
+  #if KBDSIDE == right
+  if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ALT_RIGHT);
+  #elif KBDSIDE == left
+  if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_GUI_RIGHT);
+  #endif //KBDSIDE
+  populate_key_rows(3, keys_pressed, mod);
+  gpio_put(COL3, 0);
+
+  buf_full = key_buffer_full();
+  if(buf_full) return;
+
+  for(uint8_t col=0; col < (NUM_COLS - 3); col++){
     gpio_put(cols[col], 1);
-    for(uint8_t row=0; row < NUM_ROWS; row++){
-      if(gpio_get(rows[row])){
-        #if KBDSIDE == right
-        if(mod)buf_full = key_buffer_push(lowered_map_r[row][col]);
-        else buf_full = key_buffer_push(normal_map_r[row][col]);
-        #endif //RIGHT_SIDE
-        #if KBDSIDE == left
-        if(mod) buf_full = key_buffer_push(raised_map_l[row][col]);
-        else buf_full = key_buffer_push(normal_map_l[row][col]);
-        #endif //KBDSIDE == left
-      }
-    }
+    keys_pressed = gpio_get_all();
+    populate_key_rows(col, keys_pressed, mod);
     gpio_put(cols[col], 0);
   }
 }

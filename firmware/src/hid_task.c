@@ -22,7 +22,12 @@ void send_hid_report(uint8_t raw_code) {
   uint8_t keycode[6] = {0};
   keycode[0] = raw_code;
   if(tud_hid_ready()) {
-    tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
+    if(raw_code != HID_KEY_NONE){
+      tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
+    }
+    else{
+      tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
+    }
   }
 }
 
