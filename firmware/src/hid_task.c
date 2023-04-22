@@ -11,29 +11,18 @@
 #include "tusb.h"
 
 #include "usb_descriptors.h"
+#include "hid_task.h"
 
 /*
  * \fn void send_hid_report()
  * \brief sends report for keyboard HID profile. Should be called every 10ms
- * \param uint32_t btn - key pressed?
+ * \param keycode_t* keycode to send
  */
-void send_hid_report(uint32_t btn) {
-  static bool has_keyboard_key = false;
-
+void send_hid_report(uint8_t raw_code) {
   uint8_t keycode[6] = {0};
-  keycode[0] = HID_KEY_A;
+  keycode[0] = raw_code;
   if(tud_hid_ready()) {
-
-    if(btn != 0){
-      tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
-      has_keyboard_key = true;
-    }
-    else{
-      if(has_keyboard_key){
-        tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
-        has_keyboard_key = false;
-      }
-    }
+    tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
   }
 }
 

@@ -10,6 +10,7 @@
 #include "tusb.h"
 
 #include "hid_task.h"
+#include "keymap.h"
 #include "timeslice.h"
 #include "usb_descriptors.h"
 
@@ -24,7 +25,6 @@ int main(void) {
   board_init();
   tusb_init();
 
-  uint32_t key = 0;
   uint8_t led_toggle = 1;
 
   while(1) {
@@ -36,7 +36,8 @@ int main(void) {
     }
 
     if(get_10ms_slice() != 0) {
-      send_hid_report(0);
+      poll_keypresses();
+      send_hid_report(get_keypress());
       clear_10ms_slice();
     }
 
@@ -47,7 +48,6 @@ int main(void) {
     if(get_s_slice() != 0) {
       gpio_put(25, led_toggle);
       led_toggle = led_toggle ? 0 : 1;
-      key = key ? 0 : 1;
       clear_s_slice();
     }
 
