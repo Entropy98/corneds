@@ -121,18 +121,18 @@ static void populate_key_rows(uint8_t col, uint32_t keys_pressed, uint8_t mod){
     if(key_buffer_full()) break;
     if(mod){
       if(keys_pressed & row_masks[row]){
-        #if KBDSIDE == right
+        #ifdef KBDSIDE_RIGHT
         key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
-        #elif KBDSIDE == left
+        #else
         key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
         #endif //KBDSIDE
       }
     }
     else{
       if(keys_pressed & row_masks[row]){
-        #if KBDSIDE == right
+        #ifdef KBDSIDE_RIGHT
         key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
-        #elif KBDSIDE == left
+        #else
         key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
         #endif //KBDSIDE
       }
@@ -202,9 +202,9 @@ void poll_keypresses() {
 
   gpio_put(COL5, 1);
   keys_pressed = gpio_get_all();
-  #if KBDSIDE == right
+  #ifdef KBDSIDE_RIGHT
   if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ENTER);
-  #elif KBDSIDE == left
+  #else
   if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_SPACE);
   #endif //KBDSIDE
   populate_key_rows(5, keys_pressed, mod);
@@ -215,9 +215,9 @@ void poll_keypresses() {
 
   gpio_put(COL3, 1);
   keys_pressed = gpio_get_all();
-  #if KBDSIDE == right
+  #ifdef KBDSIDE_RIGHT
   if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ALT_RIGHT);
-  #elif KBDSIDE == left
+  #else
   if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_GUI_RIGHT);
   #endif //KBDSIDE
   populate_key_rows(3, keys_pressed, mod);

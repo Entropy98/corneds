@@ -6,24 +6,38 @@ project(corneds)
 
 pico_sdk_init()
 
-set(EXEC_NAME ${PROJECT_NAME}_${KBDSIDE})
-
-add_executable(${EXEC_NAME}
+add_executable(${PROJECT_NAME}_left
+  src/main.c
+)
+add_executable(${PROJECT_NAME}_right
   src/main.c
 )
 
-target_compile_options(${EXEC_NAME} PUBLIC
+target_compile_options(${PROJECT_NAME}_right PUBLIC
+  -g
+  -O0
+  -DKBDSIDE_RIGHT
+)
+target_compile_options(${PROJECT_NAME}_left PUBLIC
   -g
   -O0
 )
 
-target_sources(${EXEC_NAME} PUBLIC
+target_sources(${PROJECT_NAME}_right PUBLIC
+  src/hid_task.c
+  src/keymap.c
+  src/timeslice.c
+  src/usb_descriptors.c
+)
+target_sources(${PROJECT_NAME}_left PUBLIC
   src/hid_task.c
   src/keymap.c
   src/timeslice.c
   src/usb_descriptors.c
 )
 
-target_include_directories(${EXEC_NAME} PUBLIC inc)
+target_include_directories(${PROJECT_NAME}_right PUBLIC inc)
+target_include_directories(${PROJECT_NAME}_left PUBLIC inc)
 
-target_link_libraries(${EXEC_NAME} pico_stdlib tinyusb_device tinyusb_board)
+target_link_libraries(${PROJECT_NAME}_right pico_stdlib tinyusb_device tinyusb_board)
+target_link_libraries(${PROJECT_NAME}_left pico_stdlib tinyusb_device tinyusb_board)
