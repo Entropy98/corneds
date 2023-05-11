@@ -13,6 +13,7 @@
 #include "keymap.h"
 #include "timeslice.h"
 #include "usb_descriptors.h"
+#include "usb_detect.h"
 
 #define BOARD_LED 25
 
@@ -25,6 +26,10 @@ int main(void) {
   board_init();
   tusb_init();
   init_keys();
+
+  if(usb_detected()){
+    gpio_put(BOARD_LED, 1);
+  }
 
   while(1) {
     update_time_slices();
@@ -45,7 +50,6 @@ int main(void) {
     }
 
     if(get_s_slice() != 0) {
-      gpio_put(25, 0);
       clear_s_slice();
     }
 

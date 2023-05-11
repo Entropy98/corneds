@@ -28,16 +28,18 @@ target_sources(${PROJECT_NAME}_right PUBLIC
   src/keymap.c
   src/timeslice.c
   src/usb_descriptors.c
+  src/usb_detect.c
 )
 target_sources(${PROJECT_NAME}_left PUBLIC
   src/hid_task.c
   src/keymap.c
   src/timeslice.c
   src/usb_descriptors.c
+  src/usb_detect.c
 )
 
 target_include_directories(${PROJECT_NAME}_right PUBLIC inc)
 target_include_directories(${PROJECT_NAME}_left PUBLIC inc)
 
-target_link_libraries(${PROJECT_NAME}_right pico_stdlib tinyusb_device tinyusb_board)
-target_link_libraries(${PROJECT_NAME}_left pico_stdlib tinyusb_device tinyusb_board)
+target_link_libraries(${PROJECT_NAME}_right pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
+target_link_libraries(${PROJECT_NAME}_left pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)

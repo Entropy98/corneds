@@ -85,7 +85,6 @@ static uint8_t key_buffer_push(uint8_t key){
     key_buffer[key_buffer_foot] = key;
     key_buffer_foot++;
     if(key_buffer_foot == KEY_BUFFER_SIZE) key_buffer_foot = 0;
-    gpio_put(25, 1);
     retval = 0;
   }
 
