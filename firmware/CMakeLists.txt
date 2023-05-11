@@ -26,6 +26,7 @@ target_compile_options(${PROJECT_NAME}_left PUBLIC
 target_sources(${PROJECT_NAME}_right PUBLIC
   src/hid_task.c
   src/keymap.c
+  src/led_utils.c
   src/timeslice.c
   src/usb_descriptors.c
   src/usb_detect.c
@@ -33,6 +34,7 @@ target_sources(${PROJECT_NAME}_right PUBLIC
 target_sources(${PROJECT_NAME}_left PUBLIC
   src/hid_task.c
   src/keymap.c
+  src/led_utils.c
   src/timeslice.c
   src/usb_descriptors.c
   src/usb_detect.c

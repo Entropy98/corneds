@@ -1,11 +1,12 @@
 /*
- * \file keyamp.h
+ * \file keyamp.c
  * \author Harper Weigle
  * \date Apr 19 2023
  * \brief mapping of keys to functions
  */
-#ifndef _SRC_KEYMAP_S
-#define _SRC_KEYMAP_S
+
+#ifndef _SRC_KEYMAP_C
+#define _SRC_KEYMAP_C
 
 #include "tusb.h"
 #include "pico/stdlib.h"
@@ -242,4 +243,4 @@ uint8_t get_keypress() {
   return key_buffer_pop();
 }
 
-#endif //_SRC_KEYMAP_S
+#endif //_SRC_KEYMAP_C

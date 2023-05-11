@@ -11,17 +11,14 @@
 
 #include "hid_task.h"
 #include "keymap.h"
+#include "led_utils.h"
 #include "timeslice.h"
 #include "usb_descriptors.h"
 #include "usb_detect.h"
 
-#define BOARD_LED 25
-
 int main(void) {
 
-  gpio_init(BOARD_LED);
-  gpio_set_dir(BOARD_LED, GPIO_OUT);
-  gpio_put(BOARD_LED, 0);
+  led_init();
   init_time_slices();
   board_init();
   tusb_init();
@@ -29,6 +26,9 @@ int main(void) {
 
   uint8_t line_state = usb_detected();
 
+  if(line_state == 0){
+    led_on();
+  }
   while(1) {
     update_time_slices();
     tud_task();
@@ -44,12 +44,15 @@ int main(void) {
     }
 
     if(get_100ms_slice() != 0) {
+      if(line_state == 0x4){
+        led_toggle();
+      }
       clear_100ms_slice();
     }
 
     if(get_s_slice() != 0) {
-      if(line_state == 0){
-
+      if(line_state == 0xc){
+        led_toggle();
       }
       clear_s_slice();
     }
