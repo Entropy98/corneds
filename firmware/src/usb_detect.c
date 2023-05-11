@@ -18,7 +18,7 @@
  * \returns 0 if not detected
  */
 uint8_t usb_detected(){
-  return (usb_hw->sie_status) & USB_SIE_STATUS_VBUS_DETECTED_BITS;
+  return (usb_hw->sie_status) & USB_SIE_STATUS_LINE_STATE_BITS;
 }
 
 #endif //_SRC_TIMESLICE_C

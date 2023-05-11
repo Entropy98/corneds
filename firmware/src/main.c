@@ -27,9 +27,7 @@ int main(void) {
   tusb_init();
   init_keys();
 
-  if(usb_detected()){
-    gpio_put(BOARD_LED, 1);
-  }
+  uint8_t line_state = usb_detected();
 
   while(1) {
     update_time_slices();
@@ -50,6 +48,9 @@ int main(void) {
     }
 
     if(get_s_slice() != 0) {
+      if(line_state == 0){
+
+      }
       clear_s_slice();
     }
 
