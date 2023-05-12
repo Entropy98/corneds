@@ -15,6 +15,7 @@
 #include "timeslice.h"
 #include "usb_descriptors.h"
 #include "usb_detect.h"
+#include "xboard_comms.h"
 
 int main(void) {
 
@@ -22,7 +23,13 @@ int main(void) {
   init_time_slices();
   board_init();
   tusb_init();
-  init_keys();
+  xboard_comms_init();
+  // For the time being, the left side must be plugged into USB
+  #ifdef KBDSIDE_RIGHT
+  init_keys(false);
+  #else
+  init_keys(true);
+  #endif
 
   uint8_t line_state = usb_detected();
 
@@ -39,7 +46,10 @@ int main(void) {
 
     if(get_10ms_slice() != 0) {
       poll_keypresses();
+      // For the time being, the left side must be plugged into USB
+      #ifndef KBDSIDE_RIGHT
       send_hid_report(get_keypress());
+      #endif
       clear_10ms_slice();
     }
 

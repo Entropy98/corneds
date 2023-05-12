@@ -21,6 +21,7 @@ target_compile_options(${PROJECT_NAME}_right PUBLIC
 target_compile_options(${PROJECT_NAME}_left PUBLIC
   -g
   -O0
+  -DKBDSIDE_LEFT
 )
 
 target_sources(${PROJECT_NAME}_right PUBLIC
@@ -30,6 +31,7 @@ target_sources(${PROJECT_NAME}_right PUBLIC
   src/timeslice.c
   src/usb_descriptors.c
   src/usb_detect.c
+  src/xboard_comms.c
 )
 target_sources(${PROJECT_NAME}_left PUBLIC
   src/hid_task.c
@@ -38,6 +40,7 @@ target_sources(${PROJECT_NAME}_left PUBLIC
   src/timeslice.c
   src/usb_descriptors.c
   src/usb_detect.c
+  src/xboard_comms.c
 )
 
 target_include_directories(${PROJECT_NAME}_right PUBLIC inc)

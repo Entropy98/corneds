@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Apr 19 2023
+ * \date May 11 2023
  * \brief mapping of keys to functions
  */
 
@@ -12,6 +12,7 @@
 #include "pico/stdlib.h"
 
 #include "keymap.h"
+#include "xboard_comms.h"
 
 #define NUM_COLS 6
 #define NUM_ROWS 3
@@ -22,10 +23,17 @@
 #define ROW2_MASK 0x10
 #define ROW3_MASK 0x20
 
+static bool main_kbd = true;
+
 static uint8_t key_buffer[KEY_BUFFER_SIZE];
 static uint8_t key_buffer_head = 0;
 static uint8_t key_buffer_foot = 0;
+
 static bool keys_initialized = false;
+
+static bool raised = false;
+static bool lowered = false;
+
 static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK};
 static uint8_t cols[NUM_COLS] = {COL0, COL1, COL2, COL3, COL4, COL5};
 
@@ -110,31 +118,40 @@ static uint8_t key_buffer_pop(){
 }
 
 /*
- * \fn void populate_key_rows(uint8_t col, uint32_t keys_pressed, uint8_t mod)
- * \brief local helper function for pushing all pressed rows given a column
+ * \fn void populate_key_rows(uint8_t col, uint32_t keys_pressed)
+ * \brief local helper function for pushing all pressed rows given a column or sending them to the main keyboard
  * \param uint8_t col - column asserted at time of function call
  * \param uint32_t keys_pressed - keys pressed at time of function call
- * \param uint8_t - 1 if mod if pressed
  */
-static void populate_key_rows(uint8_t col, uint32_t keys_pressed, uint8_t mod){
+static void populate_key_rows(uint8_t col, uint32_t keys_pressed){
   for(uint8_t row = 0; row < NUM_ROWS; row++){
     if(key_buffer_full()) break;
-    if(mod){
-      if(keys_pressed & row_masks[row]){
-        #ifdef KBDSIDE_RIGHT
-        key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
-        #else
-        key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
-        #endif //KBDSIDE
+    if(keys_pressed & row_masks[row]){
+      if(main_kbd){
+        if(raised){
+          #ifdef KBDSIDE_RIGHT
+          key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
+          #else
+          key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
+          #endif //KBDSIDE
+        }
+        else if(lowered){
+          #ifdef KBDSIDE_RIGHT
+          key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
+          #else
+          key_buffer_push(lowered_map_l[row][NUM_COLS - 1 - col]);
+          #endif //KBDSIDE
+        }
+        else{
+          #ifdef KBDSIDE_RIGHT
+          key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
+          #else
+          key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
+          #endif //KBDSIDE
+        }
       }
-    }
-    else{
-      if(keys_pressed & row_masks[row]){
-        #ifdef KBDSIDE_RIGHT
-        key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
-        #else
-        key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
-        #endif //KBDSIDE
+      else{
+        xboard_comms_send(row, col);
       }
     }
   }
@@ -143,8 +160,9 @@ static void populate_key_rows(uint8_t col, uint32_t keys_pressed, uint8_t mod){
 /*
  * \fn void init_keys()
  * \brief initializes the appropraite GPIOs
+ * \param bool is_main - true if this device is connected to USB
  */
-void init_keys() {
+void init_keys(bool is_main) {
   gpio_init(ROW0);
   gpio_init(ROW1);
   gpio_init(ROW2);
@@ -177,14 +195,15 @@ void init_keys() {
   gpio_set_dir(COL3, GPIO_OUT);
   gpio_set_dir(COL4, GPIO_OUT);
   gpio_set_dir(COL5, GPIO_OUT);
+
+  main_kbd = is_main;
 }
 
 /*
- * \fn void poll_keypresses()
+ * \fn void poll_keypresses(bool is_main)
  * \brief populates key_buffer with pressed keys
  */
 void poll_keypresses() {
-  uint8_t mod = 0;
   uint8_t buf_full = 0;
   uint32_t keys_pressed = 0;
 
@@ -193,8 +212,14 @@ void poll_keypresses() {
 
   gpio_put(COL4, 1);
   keys_pressed = gpio_get_all();
-  mod = keys_pressed & ROW3_MASK ? 1 : 0;
-  populate_key_rows(4, keys_pressed, mod);
+
+  #ifdef KBDSIDE_RIGHT
+  lowered = keys_pressed & ROW3_MASK ? 1 : 0;
+  #else
+  raised = keys_pressed & ROW3_MASK ? 1 : 0;
+  #endif //KBDSIDE
+
+  populate_key_rows(4, keys_pressed);
   gpio_put(COL4, 0);
 
   buf_full = key_buffer_full();
@@ -207,7 +232,7 @@ void poll_keypresses() {
   #else
   if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_SPACE);
   #endif //KBDSIDE
-  populate_key_rows(5, keys_pressed, mod);
+  populate_key_rows(5, keys_pressed);
   gpio_put(COL5, 0);
 
   buf_full = key_buffer_full();
@@ -220,7 +245,7 @@ void poll_keypresses() {
   #else
   if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_GUI_RIGHT);
   #endif //KBDSIDE
-  populate_key_rows(3, keys_pressed, mod);
+  populate_key_rows(3, keys_pressed);
   gpio_put(COL3, 0);
 
   buf_full = key_buffer_full();
@@ -229,8 +254,40 @@ void poll_keypresses() {
   for(uint8_t col=0; col < (NUM_COLS - 3); col++){
     gpio_put(cols[col], 1);
     keys_pressed = gpio_get_all();
-    populate_key_rows(col, keys_pressed, mod);
+    populate_key_rows(col, keys_pressed);
     gpio_put(cols[col], 0);
+  }
+}
+
+/*
+ * \fn void push_keypress(uint8_t row, uint8_t key)
+ * \brief Push a specific key to the key buffer
+ * \param uint8_t row - row of the key pressed
+ * \param uint8_t col - column of the key pressed
+ */
+void push_keypress(uint8_t row, uint8_t col){
+  if(!key_buffer_full()){
+    if(raised){
+      #ifdef KBDSIDE_RIGHT
+      key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
+      #else
+      key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
+      #endif //KBDSIDE
+    }
+    else if(lowered){
+      #ifdef KBDSIDE_RIGHT
+      key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
+      #else
+      key_buffer_push(lowered_map_l[row][NUM_COLS - 1 - col]);
+      #endif //KBDSIDE
+    }
+    else{
+      #ifdef KBDSIDE_RIGHT
+      key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
+      #else
+      key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
+      #endif //KBDSIDE
+    }
   }
 }
 
@@ -241,6 +298,39 @@ void poll_keypresses() {
  */
 uint8_t get_keypress() {
   return key_buffer_pop();
+}
+
+/*
+ * \fn bool rasied_mod_get()
+ * \brief getter for raised mod
+ * \returns state of the raised modifier
+ */
+bool raised_mod_get(){
+  return raised;
+}
+
+/*
+ * \fn void rasied_mod_set(bool pressed)
+ * \brief setter for raised mod
+ */
+void raised_mod_set(bool pressed){
+  raised = pressed;
+}
+
+/*
+ * \fn bool lowered_mod_get()
+ * \brief getter for raised mod
+ */
+bool lowered_mod_get(){
+  return lowered;
+}
+
+/*
+ * \fn void lowered_mod_set(bool pressed)
+ * \brief setter for raised mod
+ */
+void lowered_mod_set(bool pressed){
+  lowered = pressed;
 }
 
 #endif //_SRC_KEYMAP_C

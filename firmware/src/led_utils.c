@@ -5,8 +5,8 @@
  * \brief LED utilities
  */
 
-#ifndef _INC_LED_UTILS_C
-#define _INC_LED_UTILS_C
+#ifndef _SRC_LED_UTILS_C
+#define _SRC_LED_UTILS_C
 
 #include "pico/stdlib.h"
 
@@ -54,4 +54,4 @@ void led_off(){
   gpio_put(BOARD_LED, led_state);
 }
 
-#endif //_INC_KEYMAP_C
+#endif //_SRC_KEYMAP_C

@@ -5,13 +5,13 @@
  * \brief LED utilities
  */
 
-#ifndef _SRC_LED_UTILS_H
-#define _SRC_LED_UTILS_H
+#ifndef _INC_LED_UTILS_H
+#define _INC_LED_UTILS_H
 
 void led_init();
 void led_off();
 void led_on();
 void led_toggle();
 
-#endif //_SRC_KEYMAP_H
+#endif //_INC_KEYMAP_H
 

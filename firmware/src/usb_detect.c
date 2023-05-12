@@ -1,7 +1,7 @@
 /*
  * \file usb_detect.c
  * \author Harper Weigle
- * \date May 10 2023
+ * \date May 11 2023
  * \brief functions to determine whether or not a USB is plugged in
  */
 
