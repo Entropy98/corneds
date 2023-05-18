@@ -19,8 +19,8 @@
 #define ROW_MASK 0x70
 #define COL_MASK 0x0F
 
-#define TX 0
-#define RX 1
+#define TX 12
+#define RX 13
 
 #define BAUD_RATE 115200
 
