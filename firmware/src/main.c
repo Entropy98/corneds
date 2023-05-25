@@ -41,15 +41,15 @@ int main(void) {
     tud_task();
 
     if(get_ms_slice() != 0) {
-      clear_ms_slice();
-    }
-
-    if(get_10ms_slice() != 0) {
       poll_keypresses();
       // For the time being, the left side must be plugged into USB
       #ifndef KBDSIDE_RIGHT
       send_hid_report(get_keypress());
       #endif
+      clear_ms_slice();
+    }
+
+    if(get_10ms_slice() != 0) {
       clear_10ms_slice();
     }
 

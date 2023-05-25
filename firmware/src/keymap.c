@@ -269,23 +269,23 @@ void push_keypress(uint8_t row, uint8_t col){
   if(!key_buffer_full()){
     if(raised){
       #ifdef KBDSIDE_RIGHT
-      key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
-      #else
       key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
+      #else
+      key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
       #endif //KBDSIDE
     }
     else if(lowered){
       #ifdef KBDSIDE_RIGHT
-      key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
-      #else
       key_buffer_push(lowered_map_l[row][NUM_COLS - 1 - col]);
+      #else
+      key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
       #endif //KBDSIDE
     }
     else{
       #ifdef KBDSIDE_RIGHT
-      key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
-      #else
       key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
+      #else
+      key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
       #endif //KBDSIDE
     }
   }
