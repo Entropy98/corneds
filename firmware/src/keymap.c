@@ -33,6 +33,7 @@ static bool keys_initialized = false;
 
 static bool raised = false;
 static bool lowered = false;
+static bool shifted = false;
 
 static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK};
 static uint8_t cols[NUM_COLS] = {COL0, COL1, COL2, COL3, COL4, COL5};
@@ -207,51 +208,65 @@ void poll_keypresses() {
   uint8_t buf_full = 0;
   uint32_t keys_pressed = 0;
 
-  buf_full = key_buffer_full();
-  if(buf_full) return;
+  if(!key_buffer_full()){
+    gpio_put(COL4, 1);
+    keys_pressed = gpio_get_all();
 
-  gpio_put(COL4, 1);
-  keys_pressed = gpio_get_all();
+    #ifdef KBDSIDE_RIGHT
+    if(keys_pressed & ROW3_MASK){
+      lowered_mod_set(true);
+    }
+    else{
+      lowered_mod_set(false);
+    }
+    #else
+    if(keys_pressed & ROW3_MASK){
+      raised_mod_set(true);
+    }
+    else{
+      raised_mod_set(false);
+    }
+    #endif //KBDSIDE
 
-  #ifdef KBDSIDE_RIGHT
-  lowered = keys_pressed & ROW3_MASK ? 1 : 0;
-  #else
-  raised = keys_pressed & ROW3_MASK ? 1 : 0;
-  #endif //KBDSIDE
+    populate_key_rows(4, keys_pressed);
+    gpio_put(COL4, 0);
+  }
 
-  populate_key_rows(4, keys_pressed);
-  gpio_put(COL4, 0);
+  if(!key_buffer_full()){
+    gpio_put(COL5, 1);
+    keys_pressed = gpio_get_all();
+    #ifdef KBDSIDE_RIGHT
+    if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ENTER);
+    #else
+    if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_SPACE);
+    #endif //KBDSIDE
+    populate_key_rows(5, keys_pressed);
+    gpio_put(COL5, 0);
+  }
 
-  buf_full = key_buffer_full();
-  if(buf_full) return;
+  if(!key_buffer_full()){
+    gpio_put(COL3, 1);
+    keys_pressed = gpio_get_all();
+    #ifdef KBDSIDE_RIGHT
+    if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ALT_RIGHT);
+    #else
+    if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_GUI_RIGHT);
+    #endif //KBDSIDE
+    populate_key_rows(3, keys_pressed);
+    gpio_put(COL3, 0);
+  }
 
-  gpio_put(COL5, 1);
-  keys_pressed = gpio_get_all();
-  #ifdef KBDSIDE_RIGHT
-  if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ENTER);
-  #else
-  if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_SPACE);
-  #endif //KBDSIDE
-  populate_key_rows(5, keys_pressed);
-  gpio_put(COL5, 0);
+  if(!key_buffer_full()){
+    gpio_put(COL0, 1);
+    keys_pressed = gpio_get_all();
+    if(keys_pressed & ROW2_MASK) shift_set(true);
+    populate_key_rows(0, keys_pressed);
+    gpio_put(COL0, 0);
+  }
 
-  buf_full = key_buffer_full();
-  if(buf_full) return;
+  for(uint8_t col=1; col < (NUM_COLS - 3); col++){
+    if(key_buffer_full()) break;
 
-  gpio_put(COL3, 1);
-  keys_pressed = gpio_get_all();
-  #ifdef KBDSIDE_RIGHT
-  if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ALT_RIGHT);
-  #else
-  if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_GUI_RIGHT);
-  #endif //KBDSIDE
-  populate_key_rows(3, keys_pressed);
-  gpio_put(COL3, 0);
-
-  buf_full = key_buffer_full();
-  if(buf_full) return;
-
-  for(uint8_t col=0; col < (NUM_COLS - 3); col++){
     gpio_put(cols[col], 1);
     keys_pressed = gpio_get_all();
     populate_key_rows(col, keys_pressed);
@@ -331,6 +346,22 @@ bool lowered_mod_get(){
  */
 void lowered_mod_set(bool pressed){
   lowered = pressed;
+}
+
+/*
+ * \fn bool shift_get()
+ * \brief getter for shift
+ */
+bool shift_get(){
+  return shifted;
+}
+
+/*
+ * \fn void shift_set(bool pressed)
+ * \brief setter for shift
+ */
+void shift_set(bool pressed){
+  lowered = shifted;
 }
 
 #endif //_SRC_KEYMAP_C

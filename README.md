@@ -31,3 +31,5 @@
  * Bug where pressing multiple keys causes both to be sent way too many times
  * Bug where board stops responding after use
  * Alt and Enter aren't working
+ * ~~Implement shift~~
+   * Need to test

@@ -15,9 +15,10 @@
 #include "keymap.h"
 #include "xboard_comms.h"
 
-#define MOD_BIT 0x80
-#define ROW_MASK 0x70
-#define COL_MASK 0x0F
+#define MOD_BIT   0x80
+#define SHIFT_BIT 0x60
+#define ROW_MASK  0x30
+#define COL_MASK  0x0F
 
 #define TX 12
 #define RX 13
@@ -44,6 +45,12 @@ void rx_irq(){
       #else
       lowered_mod_set(false);
       #endif
+    }
+    if(pkt & SHIFT_BIT){
+      shift_set(true);
+    }
+    else{
+      shift_set(false);
     }
     push_keypress((pkt & ROW_MASK) >> 4, pkt & COL_MASK);
   }
@@ -81,6 +88,7 @@ void xboard_comms_send(uint8_t row, uint8_t col){
   #else
   pkt |= raised_mod_get() ? MOD_BIT : 0;
   #endif
+  pkt |= shift_get() ? SHIFT_BIT : 0;
   pkt |= (row << 4);
   pkt |= col;
   uart_putc_raw(uart0, pkt);

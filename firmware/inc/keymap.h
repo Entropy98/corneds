@@ -50,5 +50,7 @@ bool lowered_mod_get();
 void lowered_mod_set(bool pressed);
 bool raised_mod_get();
 void raised_mod_set(bool pressed);
+bool shift_get();
+void shift_set(bool pressed);
 
 #endif //_INC_KEYMAP_H
