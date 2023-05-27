@@ -30,6 +30,7 @@
  * Bug where ; key sends ;l
  * Bug where pressing multiple keys causes both to be sent way too many times
  * Bug where board stops responding after use
- * Alt and Enter aren't working
+ * ~~Alt and Enter aren't working~~
+   * Need to test but this was because I wasn't handling those rows in xboard comms
  * ~~Implement shift~~
    * Need to test

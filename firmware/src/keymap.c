@@ -205,7 +205,6 @@ void init_keys(bool is_main) {
  * \brief populates key_buffer with pressed keys
  */
 void poll_keypresses() {
-  uint8_t buf_full = 0;
   uint32_t keys_pressed = 0;
 
   if(!key_buffer_full()){
@@ -282,26 +281,44 @@ void poll_keypresses() {
  */
 void push_keypress(uint8_t row, uint8_t col){
   if(!key_buffer_full()){
-    if(raised){
-      #ifdef KBDSIDE_RIGHT
-      key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
-      #else
-      key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
-      #endif //KBDSIDE
+    if(row < 3){
+      if(raised_mod_get()){
+        #ifdef KBDSIDE_RIGHT
+        key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
+        #else
+        key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
+        #endif //KBDSIDE
+      }
+      else if(lowered_mod_get()){
+        #ifdef KBDSIDE_RIGHT
+        key_buffer_push(lowered_map_l[row][NUM_COLS - 1 - col]);
+        #else
+        key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
+        #endif //KBDSIDE
+      }
+      else{
+        #ifdef KBDSIDE_RIGHT
+        key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
+        #else
+        key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
+        #endif //KBDSIDE
+      }
     }
-    else if(lowered){
-      #ifdef KBDSIDE_RIGHT
-      key_buffer_push(lowered_map_l[row][NUM_COLS - 1 - col]);
-      #else
-      key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
-      #endif //KBDSIDE
-    }
-    else{
-      #ifdef KBDSIDE_RIGHT
-      key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
-      #else
-      key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
-      #endif //KBDSIDE
+    else{ // mod row. The mod key is handled in the packet information
+      if(col == 5){
+        #ifdef KBDSIDE_RIGHT
+        key_buffer_push(HID_KEY_ENTER);
+        #else
+        key_buffer_push(HID_KEY_SPACE);
+        #endif //KBDSIDE
+      }
+      else if(col == 3){
+        #ifdef KBDSIDE_RIGHT
+        key_buffer_push(HID_KEY_ALT_RIGHT);
+        #else
+        key_buffer_push(HID_KEY_GUI_RIGHT);
+        #endif //KBDSIDE
+      }
     }
   }
 }
