@@ -16,7 +16,7 @@
 #include "xboard_comms.h"
 
 #define MOD_BIT   0x80
-#define SHIFT_BIT 0x60
+#define SHIFT_BIT 0x40
 #define ROW_MASK  0x30
 #define COL_MASK  0x0F
 
@@ -89,8 +89,8 @@ void xboard_comms_send(uint8_t row, uint8_t col){
   pkt |= raised_mod_get() ? MOD_BIT : 0;
   #endif
   pkt |= shift_get() ? SHIFT_BIT : 0;
-  pkt |= (row << 4);
-  pkt |= col;
+  pkt |= ((row << 4)) & ROW_MASK;
+  pkt |= col & COL_MASK;
   uart_putc_raw(uart0, pkt);
 }
 
