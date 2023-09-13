@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date May 11 2023
+ * \date Sep 13 2023
  * \brief mapping of keys to functions
  */
 
@@ -258,7 +258,12 @@ void poll_keypresses() {
   if(!key_buffer_full()){
     gpio_put(COL0, 1);
     keys_pressed = gpio_get_all();
-    if(keys_pressed & ROW2_MASK) shift_set(true);
+    if(keys_pressed & ROW2_MASK) {
+      shift_set(true);
+    }
+    else {
+      shift_set(false);
+    }
     populate_key_rows(0, keys_pressed);
     gpio_put(COL0, 0);
   }
@@ -378,7 +383,7 @@ bool shift_get(){
  * \brief setter for shift
  */
 void shift_set(bool pressed){
-  lowered = shifted;
+  shifted = pressed;
 }
 
 #endif //_SRC_KEYMAP_C

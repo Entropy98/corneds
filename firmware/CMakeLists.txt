@@ -13,6 +13,11 @@ add_executable(${PROJECT_NAME}_right
   src/main.c
 )
 
+# Tests
+add_executable(${PROJECT_NAME}_test_print
+  test/test_print.c
+)
+
 target_compile_options(${PROJECT_NAME}_right PUBLIC
   -g
   -O0
@@ -22,6 +27,11 @@ target_compile_options(${PROJECT_NAME}_left PUBLIC
   -g
   -O0
   -DKBDSIDE_LEFT
+)
+# Tests
+target_compile_options(${PROJECT_NAME}_test_print PUBLIC
+  -g
+  -O0
 )
 
 target_sources(${PROJECT_NAME}_right PUBLIC
@@ -43,8 +53,26 @@ target_sources(${PROJECT_NAME}_left PUBLIC
   src/xboard_comms.c
 )
 
+# Tests
+target_sources(${PROJECT_NAME}_test_print PUBLIC
+  src/hid_task.c
+  src/keymap.c
+  src/led_utils.c
+  src/timeslice.c
+  src/usb_descriptors.c
+  src/usb_detect.c
+  src/xboard_comms.c
+)
+
+
 target_include_directories(${PROJECT_NAME}_right PUBLIC inc)
 target_include_directories(${PROJECT_NAME}_left PUBLIC inc)
 
+# Tests
+target_include_directories(${PROJECT_NAME}_test_print PUBLIC inc)
+
 target_link_libraries(${PROJECT_NAME}_right pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
 target_link_libraries(${PROJECT_NAME}_left pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
+
+# Tests
+target_link_libraries(${PROJECT_NAME}_test_print pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
