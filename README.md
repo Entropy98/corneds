@@ -11,9 +11,7 @@
 
 # To Do
 ## PCB
- * ~~Add mounting holes~~
- * ~~TRRS jack inverted. The plug fits backwards and upside down~~ -> Made own footprint. Mounting holes are sketchy though
- * ~~Change non-ground test points to circles~~
+ * Mounting holes are way too big. The units are probably wrong in KiCAD. They should be shrunk
 
 ## Hardware
  * ~~Design Top Plate~~
@@ -21,17 +19,7 @@
  * Modify top plate to not cover RPi. It won't fit
 
 ## Firmware
- * ~~Make keymap~~
- * ~~Implement GPIO -> HID Report~~
- * ~~Need to implement cross board communication~~
-   * Can't implement this well because I can't differentiate the boards with cross board power coming two and from VBUS.
-   * I'll try to implement with the inefficiency of both boards attempting to send to the USB Host as well as the other board.
- * Change firmware to use rev2 PCB ports when rev2 is ordered
- * ~~Bug where ; key sends ;l~~
-   * Disappeared randomly
- * Bug where pressing multiple keys causes both to be sent way too many times
- * Bug where board stops responding after use
- * ~~Alt and Enter aren't working~~
-   * ~~Need to test but this was because I wasn't handling those rows in xboard comms~~ -> Nothing works right now
- * ~~Implement shift~~
-   * Shift and mod don't work but everything else works
+ * Tests
+   * print passes
+   * write keypress test
+   * write test to determine which board is which

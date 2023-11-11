@@ -24,15 +24,10 @@ int main(void) {
   board_init();
   tusb_init();
   xboard_comms_init();
-  // For the time being, the left side must be plugged into USB
-  #ifdef KBDSIDE_RIGHT
-  init_keys(false);
-  #else
-  init_keys(true);
-  #endif
 
   uint8_t line_state = usb_detected();
 
+  init_keys(line_state == 0xc);
   if(line_state == 0){
     led_on();
   }
@@ -42,10 +37,9 @@ int main(void) {
 
     if(get_ms_slice() != 0) {
       poll_keypresses();
-      // For the time being, the left side must be plugged into USB
-      #ifndef KBDSIDE_RIGHT
-      send_hid_report(get_keypress());
-      #endif
+      if(line_state == 0xc) {
+        send_hid_report(get_keypress());
+      }
       clear_ms_slice();
     }
 
