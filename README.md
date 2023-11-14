@@ -21,5 +21,6 @@
 ## Firmware
  * Tests
    * print passes
+   * test debug_print test
    * write keypress test
    * write test to determine which board is which

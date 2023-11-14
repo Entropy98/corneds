@@ -1,7 +1,7 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Apr 18 2023
+ * \date Nov 12 2023
  * \brief Firmware for corneDS split 40% keyboard
  */
 
@@ -9,6 +9,7 @@
 #include "pico/stdlib.h"
 #include "tusb.h"
 
+#include "debug_uart.h"
 #include "hid_task.h"
 #include "keymap.h"
 #include "led_utils.h"
@@ -24,12 +25,17 @@ int main(void) {
   board_init();
   tusb_init();
   xboard_comms_init();
+  debug_uart_init();
 
   uint8_t line_state = usb_detected();
 
   init_keys(line_state == 0xc);
   if(line_state == 0){
+    debug_print("Initializing for main keyboard\n");
     led_on();
+  }
+  else {
+    debug_print("Initializing for peripheral keyboard\n");
   }
   while(1) {
     update_time_slices();
