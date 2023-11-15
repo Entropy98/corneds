@@ -29,6 +29,7 @@ void send_hid_report(uint8_t raw_code) {
     #else
     modifier = KEYBOARD_MODIFIER_RIGHTSHIFT;
     #endif
+    keycode[0] = raw_code;
   }
   else{
     switch (raw_code) {

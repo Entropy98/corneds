@@ -3,6 +3,7 @@
  * \author Harper Weigle
  * \date Nov 13 2023
  * \brief Testing the debug uart interface
+ *        Prints "Hello World\n" over the debug UART interface
  */
 
 #include "bsp/board.h"

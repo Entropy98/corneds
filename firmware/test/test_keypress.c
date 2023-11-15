@@ -3,6 +3,8 @@
  * \author Harper Weigle
  * \date Nov 14 2023
  * \brief Testing if keypresses are read properly
+ *        Sends the keys "[cX, rY]" where X is the column of the key pressed
+ *        and Y is the row of the key pressed
  */
 
 #include "bsp/board.h"
@@ -16,15 +18,15 @@
 #include "usb_descriptors.h"
 
 #define NUM_KEYS 8U
-#define COL_IDX 6U
-#define ROW_IDX 2U
+#define COL_IDX 2U
+#define ROW_IDX 6U
 
 // Can treat all rows as the same because we're just looking at coordinates. Not mapping to keys
 static uint8_t row_masks[NUM_ROWS + 1] = {ROW0_MASK, ROW1_MASK, ROW2_MASK, ROW3_MASK};
 static uint8_t cols[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYCOL3_PIN, KEYCOL4_PIN, KEYCOL5_PIN};
 
 static uint8_t num_keys[NUM_COLS] = {HID_KEY_0, HID_KEY_1, HID_KEY_2, HID_KEY_3, HID_KEY_4, HID_KEY_5};
-static uint8_t key_array[NUM_KEYS] = {HID_KEY_BRACKET_LEFT, HID_KEY_R, 0, HID_KEY_COMMA, HID_KEY_SPACE, HID_KEY_C, 0, HID_KEY_BRACKET_RIGHT};
+static uint8_t key_array[NUM_KEYS] = {HID_KEY_BRACKET_LEFT, HID_KEY_C, 0, HID_KEY_COMMA, HID_KEY_SPACE, HID_KEY_R, 0, HID_KEY_BRACKET_RIGHT};
 
 int main(void) {
   led_init();

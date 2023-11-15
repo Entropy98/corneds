@@ -3,6 +3,9 @@
  * \author Harper Weigle
  * \date Nov 13 2023
  * \brief Testing the scan codes sent over the tud_hid_report
+ *        Sends the keys "Hello World\n" every second and toggles the main LED
+ *        !!Discalimer!!
+ *        This is easiest done with two computers so you can still send commands
  */
 
 #include "bsp/board.h"
