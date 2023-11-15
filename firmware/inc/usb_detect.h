@@ -10,6 +10,9 @@
 
 #include "pico/stdlib.h"
 
+#define USB_DISCONNECTED 0
+#define USB_CONNECTED 0x4
+
 uint8_t usb_detected();
 
 #endif //_INC_TIMESLICE_H

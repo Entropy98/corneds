@@ -39,6 +39,7 @@ int main(void) {
 
     if(get_s_slice() != 0) {
       debug_print("Hello world\n");
+      led_toggle();
       clear_s_slice();
     }
   }

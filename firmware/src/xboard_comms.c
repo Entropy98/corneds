@@ -13,15 +13,13 @@
 #include "hardware/irq.h"
 
 #include "keymap.h"
+#include "pinmap.h"
 #include "xboard_comms.h"
 
 #define MOD_BIT   0x80
 #define SHIFT_BIT 0x40
 #define ROW_MASK  0x30
 #define COL_MASK  0x0F
-
-#define TX 12
-#define RX 13
 
 #define BAUD_RATE 115200
 
@@ -63,8 +61,8 @@ void rx_irq(){
 void xboard_comms_init(){
   // UART Initialization
   uart_init(uart0, BAUD_RATE);
-  gpio_set_function(TX, GPIO_FUNC_UART);
-  gpio_set_function(RX, GPIO_FUNC_UART);
+  gpio_set_function(XBOARDTX_PIN, GPIO_FUNC_UART);
+  gpio_set_function(XBOARDRX_PIN, GPIO_FUNC_UART);
   uart_set_hw_flow(uart0, false, false);
   uart_set_format(uart0, 8, 1, UART_PARITY_NONE);
   uart_set_fifo_enabled(uart0, false);

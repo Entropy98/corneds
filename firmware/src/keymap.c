@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Sep 13 2023
+ * \date Nov 14 2023
  * \brief mapping of keys to functions
  */
 
@@ -12,16 +12,8 @@
 #include "pico/stdlib.h"
 
 #include "keymap.h"
+#include "pinmap.h"
 #include "xboard_comms.h"
-
-#define NUM_COLS 6
-#define NUM_ROWS 3
-#define KEY_BUFFER_SIZE 50
-
-#define ROW0_MASK 0x04
-#define ROW1_MASK 0x08
-#define ROW2_MASK 0x10
-#define ROW3_MASK 0x20
 
 static bool main_kbd = true;
 
@@ -29,14 +21,14 @@ static uint8_t key_buffer[KEY_BUFFER_SIZE];
 static uint8_t key_buffer_head = 0;
 static uint8_t key_buffer_foot = 0;
 
+static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK};
+static uint8_t cols[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYCOL3_PIN, KEYCOL4_PIN, KEYCOL5_PIN};
+
 static bool keys_initialized = false;
 
 static bool raised = false;
 static bool lowered = false;
 static bool shifted = false;
-
-static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK};
-static uint8_t cols[NUM_COLS] = {COL0, COL1, COL2, COL3, COL4, COL5};
 
 static keymap_t normal_map_r = {{ HID_KEY_Y,    HID_KEY_U,    HID_KEY_I,     HID_KEY_O,      HID_KEY_P,         HID_KEY_BACKSPACE},
                                 { HID_KEY_H,    HID_KEY_J,    HID_KEY_K,     HID_KEY_L,      HID_KEY_SEMICOLON, HID_KEY_APOSTROPHE},
@@ -164,38 +156,38 @@ static void populate_key_rows(uint8_t col, uint32_t keys_pressed){
  * \param bool is_main - true if this device is connected to USB
  */
 void init_keys(bool is_main) {
-  gpio_init(ROW0);
-  gpio_init(ROW1);
-  gpio_init(ROW2);
-  gpio_init(ROW3);
-  gpio_init(COL0);
-  gpio_init(COL1);
-  gpio_init(COL2);
-  gpio_init(COL3);
-  gpio_init(COL4);
-  gpio_init(COL5);
+  gpio_init(KEYROW0_PIN);
+  gpio_init(KEYROW1_PIN);
+  gpio_init(KEYROW2_PIN);
+  gpio_init(KEYROW3_PIN);
+  gpio_init(KEYCOL0_PIN);
+  gpio_init(KEYCOL1_PIN);
+  gpio_init(KEYCOL2_PIN);
+  gpio_init(KEYCOL3_PIN);
+  gpio_init(KEYCOL4_PIN);
+  gpio_init(KEYCOL5_PIN);
 
-  gpio_set_function(ROW0, GPIO_FUNC_SIO);
-  gpio_set_function(ROW1, GPIO_FUNC_SIO);
-  gpio_set_function(ROW2, GPIO_FUNC_SIO);
-  gpio_set_function(ROW3, GPIO_FUNC_SIO);
-  gpio_set_function(COL0, GPIO_FUNC_SIO);
-  gpio_set_function(COL1, GPIO_FUNC_SIO);
-  gpio_set_function(COL2, GPIO_FUNC_SIO);
-  gpio_set_function(COL3, GPIO_FUNC_SIO);
-  gpio_set_function(COL4, GPIO_FUNC_SIO);
-  gpio_set_function(COL5, GPIO_FUNC_SIO);
+  gpio_set_function(KEYROW0_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(KEYROW1_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(KEYROW2_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(KEYROW3_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(KEYCOL0_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(KEYCOL1_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(KEYCOL2_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(KEYCOL3_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(KEYCOL4_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(KEYCOL5_PIN, GPIO_FUNC_SIO);
 
-  gpio_set_dir(ROW0, GPIO_IN);
-  gpio_set_dir(ROW1, GPIO_IN);
-  gpio_set_dir(ROW2, GPIO_IN);
-  gpio_set_dir(ROW3, GPIO_IN);
-  gpio_set_dir(COL0, GPIO_OUT);
-  gpio_set_dir(COL1, GPIO_OUT);
-  gpio_set_dir(COL2, GPIO_OUT);
-  gpio_set_dir(COL3, GPIO_OUT);
-  gpio_set_dir(COL4, GPIO_OUT);
-  gpio_set_dir(COL5, GPIO_OUT);
+  gpio_set_dir(KEYROW0_PIN, GPIO_IN);
+  gpio_set_dir(KEYROW1_PIN, GPIO_IN);
+  gpio_set_dir(KEYROW2_PIN, GPIO_IN);
+  gpio_set_dir(KEYROW3_PIN, GPIO_IN);
+  gpio_set_dir(KEYCOL0_PIN, GPIO_OUT);
+  gpio_set_dir(KEYCOL1_PIN, GPIO_OUT);
+  gpio_set_dir(KEYCOL2_PIN, GPIO_OUT);
+  gpio_set_dir(KEYCOL3_PIN, GPIO_OUT);
+  gpio_set_dir(KEYCOL4_PIN, GPIO_OUT);
+  gpio_set_dir(KEYCOL5_PIN, GPIO_OUT);
 
   main_kbd = is_main;
 }
@@ -208,7 +200,7 @@ void poll_keypresses() {
   uint32_t keys_pressed = 0;
 
   if(!key_buffer_full()){
-    gpio_put(COL4, 1);
+    gpio_put(KEYCOL4_PIN, true);
     keys_pressed = gpio_get_all();
 
     #ifdef KBDSIDE_RIGHT
@@ -228,11 +220,11 @@ void poll_keypresses() {
     #endif //KBDSIDE
 
     populate_key_rows(4, keys_pressed);
-    gpio_put(COL4, 0);
+    gpio_put(KEYCOL4_PIN, false);
   }
 
   if(!key_buffer_full()){
-    gpio_put(COL5, 1);
+    gpio_put(KEYCOL5_PIN, true);
     keys_pressed = gpio_get_all();
     #ifdef KBDSIDE_RIGHT
     if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ENTER);
@@ -240,11 +232,11 @@ void poll_keypresses() {
     if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_SPACE);
     #endif //KBDSIDE
     populate_key_rows(5, keys_pressed);
-    gpio_put(COL5, 0);
+    gpio_put(KEYCOL5_PIN, false);
   }
 
   if(!key_buffer_full()){
-    gpio_put(COL3, 1);
+    gpio_put(KEYCOL3_PIN, true);
     keys_pressed = gpio_get_all();
     #ifdef KBDSIDE_RIGHT
     if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ALT_RIGHT);
@@ -252,11 +244,11 @@ void poll_keypresses() {
     if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_GUI_RIGHT);
     #endif //KBDSIDE
     populate_key_rows(3, keys_pressed);
-    gpio_put(COL3, 0);
+    gpio_put(KEYCOL3_PIN, false);
   }
 
   if(!key_buffer_full()){
-    gpio_put(COL0, 1);
+    gpio_put(KEYCOL0_PIN, true);
     keys_pressed = gpio_get_all();
     if(keys_pressed & ROW2_MASK) {
       shift_set(true);
@@ -265,16 +257,16 @@ void poll_keypresses() {
       shift_set(false);
     }
     populate_key_rows(0, keys_pressed);
-    gpio_put(COL0, 0);
+    gpio_put(KEYCOL0_PIN, false);
   }
 
   for(uint8_t col=1; col < (NUM_COLS - 3); col++){
     if(key_buffer_full()) break;
 
-    gpio_put(cols[col], 1);
+    gpio_put(cols[col], true);
     keys_pressed = gpio_get_all();
     populate_key_rows(col, keys_pressed);
-    gpio_put(cols[col], 0);
+    gpio_put(cols[col], false);
   }
 }
 

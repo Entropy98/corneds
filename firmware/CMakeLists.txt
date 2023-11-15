@@ -17,6 +17,9 @@ add_executable(${PROJECT_NAME}_test_print
 add_executable(${PROJECT_NAME}_test_debug_uart
   test/test_debug_uart.c
 )
+add_executable(${PROJECT_NAME}_test_keypress
+  test/test_keypress.c
+)
 
 
 target_compile_options(${PROJECT_NAME} PUBLIC
@@ -30,6 +33,10 @@ target_compile_options(${PROJECT_NAME}_test_print PUBLIC
   -O0
 )
 target_compile_options(${PROJECT_NAME}_test_debug_uart PUBLIC
+  -g
+  -O0
+)
+target_compile_options(${PROJECT_NAME}_test_keypress PUBLIC
   -g
   -O0
 )
@@ -63,6 +70,14 @@ target_sources(${PROJECT_NAME}_test_debug_uart PUBLIC
   src/usb_descriptors.c
   src/usb_detect.c
 )
+target_sources(${PROJECT_NAME}_test_keypress PUBLIC
+  src/hid_task.c
+  src/keymap.c
+  src/led_utils.c
+  src/timeslice.c
+  src/usb_descriptors.c
+  src/usb_detect.c
+)
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
@@ -70,9 +85,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC inc)
 # Tests
 target_include_directories(${PROJECT_NAME}_test_print PUBLIC inc)
 target_include_directories(${PROJECT_NAME}_test_debug_uart PUBLIC inc)
+target_include_directories(${PROJECT_NAME}_test_keypress PUBLIC inc)
 
 target_link_libraries(${PROJECT_NAME} pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
 
 # Tests
 target_link_libraries(${PROJECT_NAME}_test_print pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
 target_link_libraries(${PROJECT_NAME}_test_debug_uart tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
+target_link_libraries(${PROJECT_NAME}_test_keypress tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)

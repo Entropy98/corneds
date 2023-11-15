@@ -9,7 +9,6 @@
 #include "pico/stdlib.h"
 #include "tusb.h"
 
-#include "debug_uart.h"
 #include "hid_task.h"
 #include "keymap.h"
 #include "led_utils.h"
@@ -25,25 +24,17 @@ int main(void) {
   board_init();
   tusb_init();
   xboard_comms_init();
-  debug_uart_init();
 
   uint8_t line_state = usb_detected();
 
-  init_keys(line_state == 0xc);
-  if(line_state == 0){
-    debug_print("Initializing for main keyboard\n");
-    led_on();
-  }
-  else {
-    debug_print("Initializing for peripheral keyboard\n");
-  }
+  init_keys(line_state == USB_CONNECTED);
   while(1) {
     update_time_slices();
     tud_task();
 
     if(get_ms_slice() != 0) {
       poll_keypresses();
-      if(line_state == 0xc) {
+      if(line_state == USB_CONNECTED) {
         send_hid_report(get_keypress());
       }
       clear_ms_slice();
@@ -54,16 +45,13 @@ int main(void) {
     }
 
     if(get_100ms_slice() != 0) {
-      if(line_state == 0x4){
+      if(line_state == USB_CONNECTED){
         led_toggle();
       }
       clear_100ms_slice();
     }
 
     if(get_s_slice() != 0) {
-      if(line_state == 0xc){
-        led_toggle();
-      }
       clear_s_slice();
     }
 

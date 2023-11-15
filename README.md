@@ -14,13 +14,16 @@
  * Mounting holes are way too big. The units are probably wrong in KiCAD. They should be shrunk
 
 ## Hardware
- * ~~Design Top Plate~~
- * ~~Design Back Plate~~
  * Modify top plate to not cover RPi. It won't fit
+ * Debug UART has CTS and VCC switched
+ * UART on GP6 and GP7 but need to be on GP4 and GP5 to be on a UART bus
+ * Add resistor to determine left or right
 
 ## Firmware
  * Tests
    * print passes
    * test debug_print test
+    * debug uart on wrong ports
    * write keypress test
+    * Can print a few correct keys according to coordinates but prints last char indefinitely
    * write test to determine which board is which

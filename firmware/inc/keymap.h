@@ -1,7 +1,7 @@
 /*
- * \file keyamp.h
+ * \file keymap.h
  * \author Harper Weigle
- * \date Apr 19 2023
+ * \date Nov 14 2023
  * \brief mapping of keys to functions
  */
 
@@ -29,16 +29,14 @@
 #define MACRO_LESS_THAN         0xEF
 #define MACRO_GREATER_THAN      0xEE
 
-#define ROW0  2
-#define ROW1  3
-#define ROW2  4
-#define ROW3  5
-#define COL0  6
-#define COL1  7
-#define COL2  8
-#define COL3  9
-#define COL4  10
-#define COL5  11
+#define ROW0_MASK 0x04
+#define ROW1_MASK 0x08
+#define ROW2_MASK 0x10
+#define ROW3_MASK 0x20
+
+#define NUM_COLS 6
+#define NUM_ROWS 3
+#define KEY_BUFFER_SIZE 50
 
 typedef uint8_t keymap_t[3][6];
 
