@@ -22,9 +22,7 @@
 
 ## Firmware
  * Tests
-   * print passes
    * test debug_print test
     * debug uart on wrong ports
-   * write keypress test
-    * Can print a few correct keys according to coordinates but prints last char indefinitely
    * write test to determine which board is which
+    * Need a pull-up/down resistor to determine which side is left or right

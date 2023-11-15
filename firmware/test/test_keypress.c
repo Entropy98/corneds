@@ -19,7 +19,8 @@
 #define COL_IDX 6U
 #define ROW_IDX 2U
 
-static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK};
+// Can treat all rows as the same because we're just looking at coordinates. Not mapping to keys
+static uint8_t row_masks[NUM_ROWS + 1] = {ROW0_MASK, ROW1_MASK, ROW2_MASK, ROW3_MASK};
 static uint8_t cols[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYCOL3_PIN, KEYCOL4_PIN, KEYCOL5_PIN};
 
 static uint8_t num_keys[NUM_COLS] = {HID_KEY_0, HID_KEY_1, HID_KEY_2, HID_KEY_3, HID_KEY_4, HID_KEY_5};
@@ -43,10 +44,6 @@ int main(void) {
     tud_task();
 
     if(get_ms_slice() != 0) {
-      clear_ms_slice();
-    }
-
-    if(get_10ms_slice() != 0) {
       if(key_pressed){
         if(tud_hid_ready()){
           keycode[0] = key_array[key];
@@ -64,16 +61,24 @@ int main(void) {
       else{
         gpio_put(cols[col], true);
         keys_pressed = gpio_get_all();
-        for(uint8_t row=0; row<NUM_ROWS; row++){
+        for(uint8_t row=0; row<(NUM_ROWS + 1); row++){
           if(keys_pressed & row_masks[row]){
             key_array[COL_IDX] = num_keys[col];
             key_array[ROW_IDX] = num_keys[row];
             key_pressed = true;
           }
         }
+        gpio_put(cols[col], false);
         col++;
         col %= NUM_COLS;
+        if(tud_hid_ready()){
+          tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
+        }
       }
+      clear_ms_slice();
+    }
+
+    if(get_10ms_slice() != 0) {
       clear_10ms_slice();
     }
 
