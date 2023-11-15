@@ -26,3 +26,4 @@
     * debug uart on wrong ports
    * write test to determine which board is which
     * Need a pull-up/down resistor to determine which side is left or right
+ * Shift isn't working but Mod is. Likely an issue with pressing multiple keys at once
