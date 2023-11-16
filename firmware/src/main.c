@@ -1,7 +1,7 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Nov 12 2023
+ * \date Nov 16 2023
  * \brief Firmware for corneDS split 40% keyboard
  */
 

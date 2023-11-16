@@ -42,18 +42,18 @@ static keymap_t lowered_map_r = {{ HID_KEY_F6,         HID_KEY_F7,         HID_K
                                  { HID_KEY_ARROW_LEFT, HID_KEY_ARROW_DOWN, HID_KEY_ARROW_UP, HID_KEY_ARROW_RIGHT, MACRO_PIPE,   HID_KEY_F11},
                                  { HID_KEY_MINUS,      MACRO_PLUS,         HID_KEY_NONE,     HID_KEY_NONE,        HID_KEY_NONE, HID_KEY_F12}};
 
-static keymap_t normal_map_l = {{ HID_KEY_ESCAPE,       HID_KEY_Q,    HID_KEY_W,    HID_KEY_E,        HID_KEY_R, HID_KEY_T},
-                                { HID_KEY_CONTROL_LEFT, HID_KEY_A,    HID_KEY_S,    HID_KEY_D,        HID_KEY_F, HID_KEY_G},
-                                { HID_KEY_SHIFT_LEFT,   HID_KEY_Z,    HID_KEY_X,    HID_KEY_C,        HID_KEY_V, HID_KEY_B}};
+static keymap_t normal_map_l = {{ HID_KEY_T, HID_KEY_R, HID_KEY_E, HID_KEY_W, HID_KEY_Q, HID_KEY_ESCAPE},
+                                { HID_KEY_G, HID_KEY_F, HID_KEY_D, HID_KEY_S, HID_KEY_A, HID_KEY_CONTROL_LEFT},
+                                { HID_KEY_B, HID_KEY_V, HID_KEY_C, HID_KEY_X, HID_KEY_Z, HID_KEY_SHIFT_LEFT}};
 
-static keymap_t raised_map_l = {{ HID_KEY_ESCAPE,     MACRO_EXCLAMATION_POINT, MACRO_AT,     MACRO_HASHTAG,    MACRO_DOLLAR_SIGN,    MACRO_PERCENT},
-                                { HID_KEY_TAB,        HID_KEY_1,               HID_KEY_2,    HID_KEY_3,        HID_KEY_4,            HID_KEY_5},
-                                { HID_KEY_SHIFT_LEFT, HID_KEY_BACKSLASH,       MACRO_TILDE,  HID_KEY_GRAVE,    HID_KEY_BRACKET_LEFT, MACRO_CURLY_LEFT}};
 
-static keymap_t lowered_map_l = {{ HID_KEY_ESCAPE,       HID_KEY_F1,   HID_KEY_F2,   HID_KEY_F3,       HID_KEY_F4,         HID_KEY_F5},
-                                 { HID_KEY_CONTROL_LEFT, HID_KEY_HOME, HID_KEY_END,  HID_KEY_NONE,     HID_KEY_NONE,       HID_KEY_PAGE_UP},
-                                 { HID_KEY_SHIFT_LEFT,   HID_KEY_NONE, HID_KEY_NONE, MACRO_LESS_THAN,  MACRO_GREATER_THAN, HID_KEY_PAGE_DOWN}};
+static keymap_t raised_map_l = {{ MACRO_PERCENT,    MACRO_DOLLAR_SIGN,    MACRO_HASHTAG, MACRO_AT,    MACRO_EXCLAMATION_POINT, HID_KEY_ESCAPE},
+                                { HID_KEY_5,        HID_KEY_4,            HID_KEY_3,     HID_KEY_2,   HID_KEY_1,               HID_KEY_TAB},
+                                { MACRO_CURLY_LEFT, HID_KEY_BRACKET_LEFT, HID_KEY_GRAVE, MACRO_TILDE, HID_KEY_BACKSLASH,       HID_KEY_SHIFT_LEFT}};
 
+static keymap_t lowered_map_l = {{ HID_KEY_F5,        HID_KEY_F4,         HID_KEY_F3,      HID_KEY_F2,   HID_KEY_F1,   HID_KEY_ESCAPE},
+                                 { HID_KEY_PAGE_UP,   HID_KEY_NONE,       HID_KEY_NONE,    HID_KEY_END,  HID_KEY_HOME, HID_KEY_CONTROL_LEFT},
+                                 { HID_KEY_PAGE_DOWN, MACRO_GREATER_THAN, MACRO_LESS_THAN, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_SHIFT_LEFT}};
 
 /*
  * \fn bool key_buffer_full()
@@ -271,12 +271,12 @@ void poll_keypresses() {
 }
 
 /*
- * \fn void push_keypress(uint8_t row, uint8_t key)
+ * \fn void push_keypress(uint8_t col, uint8_t row)
  * \brief Push a specific key to the key buffer
- * \param uint8_t row - row of the key pressed
  * \param uint8_t col - column of the key pressed
+ * \param uint8_t row - row of the key pressed
  */
-void push_keypress(uint8_t row, uint8_t col){
+void push_keypress(uint8_t col, uint8_t row){
   if(!key_buffer_full()){
     if(row < 3){
       if(raised_mod_get()){

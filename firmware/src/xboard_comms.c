@@ -1,7 +1,7 @@
 /*
  * \file xboard_comms.c
  * \author Harper Weigle
- * \date May 11 2023
+ * \date Nov 16 2023
  * \brief interfacing between sides of the keyboard
  */
 
@@ -50,7 +50,7 @@ void rx_irq(){
     else{
       shift_set(false);
     }
-    push_keypress((pkt & ROW_MASK) >> 4, pkt & COL_MASK);
+    push_keypress(pkt & COL_MASK,(pkt & ROW_MASK) >> 4);
   }
 }
 
@@ -74,12 +74,12 @@ void xboard_comms_init(){
 }
 
 /*
- * \fn void xboard_comms_send();
+ * \fn void xboard_comms_send(uint8_t col, uint8_t row);
  * \brief Sends a key press packet to the other keyboard
+ * \param col - column of the key pressed
  * \param row - row of the key pressed
- * \param row - column of the key pressed
  */
-void xboard_comms_send(uint8_t row, uint8_t col){
+void xboard_comms_send(uint8_t col, uint8_t row){
   uint8_t pkt = 0;
   #ifdef KBDSIDE_RIGHT
   pkt |= lowered_mod_get() ? MOD_BIT : 0;

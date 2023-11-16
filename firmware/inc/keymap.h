@@ -42,7 +42,7 @@ typedef uint8_t keymap_t[3][6];
 
 void init_keys(bool is_main);
 void poll_keypresses();
-void push_keypress(uint8_t row, uint8_t col);
+void push_keypress(uint8_t col, uint8_t row);
 uint8_t get_keypress();
 bool lowered_mod_get();
 void lowered_mod_set(bool pressed);

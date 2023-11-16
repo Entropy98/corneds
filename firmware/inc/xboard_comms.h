@@ -11,7 +11,7 @@
 #include "pico/stdlib.h"
 
 void xboard_comms_init();
-void xboard_comms_send(uint8_t row, uint8_t col);
+void xboard_comms_send(uint8_t col, uint8_t row);
 
 #endif //_INC_XBOARD_COMMS_H
 
