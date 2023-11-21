@@ -56,6 +56,8 @@ static keymap_t lowered_map_l = {{ HID_KEY_F5,        HID_KEY_F4,         HID_KE
                                  { HID_KEY_PAGE_UP,   HID_KEY_NONE,       HID_KEY_NONE,    HID_KEY_END,  HID_KEY_HOME, HID_KEY_CONTROL_LEFT},
                                  { HID_KEY_PAGE_DOWN, MACRO_GREATER_THAN, MACRO_LESS_THAN, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_SHIFT_LEFT}};
 
+static keymap_t key_cooldowns = {0};
+
 /*
  * \fn bool key_buffer_full()
  * \brief checks if the key buffer can be pushed to
@@ -112,6 +114,20 @@ static uint8_t key_buffer_pop(){
 }
 
 /*
+ * \fn decrement_key_cooldowns()
+ * \brief decrements each of the applicable keys on cooldown
+ */
+void decrement_key_cooldowns() {
+  for(uint8_t col=0; col<NUM_COLS; col++){
+    for(uint8_t row=0; row<NUM_ROWS; row++){
+      if(key_cooldowns[row][col] > 0U){
+        key_cooldowns[row][col] -= 1;
+      }
+    }
+  }
+}
+
+/*
  * \fn void init_keys()
  * \brief initializes the appropraite GPIOs
  * \param bool is_main - true if this device is connected to USB
@@ -154,7 +170,7 @@ void init_keys(bool is_main) {
 }
 
 /*
- * \fn void poll_keypresses(bool is_main)
+ * \fn void poll_keypresses()
  * \brief populates key_buffer with pressed keys
  */
 void poll_keypresses() {
@@ -187,17 +203,20 @@ void poll_keypresses() {
 
           if(main_kbd){
             #ifdef KBDSIDE_RIGHT
-              push_keypress(col, row, true);
+              push_keypress(col, row, true, false);
             #else
-              push_keypress(col, row, false);
+              push_keypress(col, row, false, false);
             #endif
           }
           else {
-            #ifdef KBDSIDE_RIGHT
-              xboard_comms_send(col, row, raised_mod_get(), shift_get());
-            #else
-              xboard_comms_send(col, row, lowered_mod_get(), shift_get());
-            #endif
+            if(key_cooldowns[row][col] == 0U){
+              #ifdef KBDSIDE_RIGHT
+                xboard_comms_send(col, row, raised_mod_get(), shift_get());
+              #else
+                xboard_comms_send(col, row, lowered_mod_get(), shift_get());
+              #endif
+              key_cooldowns[row][col] = KEY_COOLDOWN_MS;
+            }
           }
         }
         else {
@@ -230,14 +249,16 @@ void poll_keypresses() {
 }
 
 /*
- * \fn void push_keypress(uint8_t col, uint8_t row)
+ * \fn void push_keypress()
  * \brief Push a specific key to the key buffer
  * \param uint8_t col - column of the key pressed
  * \param uint8_t row - row of the key pressed
  * \param bool is_right_side - push key from the right side
+ * \param bool ignore_cooldown - don't check the cooldown and push the key
  */
-void push_keypress(uint8_t col, uint8_t row, bool is_right_side){
-  if(!key_buffer_full()){
+void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_cooldown){
+  if(!key_buffer_full() && (ignore_cooldown || (key_cooldowns[row][col] == 0U))){
+    key_cooldowns[row][col] = KEY_COOLDOWN_MS;
     if(row < 3){
       if(raised_mod_get()){
         if(is_right_side){
@@ -304,7 +325,7 @@ bool raised_mod_get(){
 }
 
 /*
- * \fn void rasied_mod_set(bool pressed)
+ * \fn void rasied_mod_set()
  * \brief setter for raised mod
  */
 void raised_mod_set(bool pressed){
@@ -320,7 +341,7 @@ bool lowered_mod_get(){
 }
 
 /*
- * \fn void lowered_mod_set(bool pressed)
+ * \fn void lowered_mod_set()
  * \brief setter for raised mod
  */
 void lowered_mod_set(bool pressed){
@@ -332,11 +353,11 @@ void lowered_mod_set(bool pressed){
  * \brief getter for shift
  */
 bool shift_get(){
-  return r_shifted || l_shifted;
+  return (r_shifted || l_shifted);
 }
 
 /*
- * \fn void shift_set(bool pressed)
+ * \fn void shift_set()
  * \brief setter for shift
  * \param pressed - whether to set or unset shift
  * \param right_side - true if setting right side

@@ -43,11 +43,14 @@
 #define MOD_ROW   3
 #define MOD_COL   4
 
+#define KEY_COOLDOWN_MS 30U
+
 typedef uint8_t keymap_t[3][6];
 
+void decrement_key_cooldowns();
 void init_keys(bool is_main);
 void poll_keypresses();
-void push_keypress(uint8_t col, uint8_t row, bool is_right_side);
+void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_cooldown);
 uint8_t get_keypress();
 bool lowered_mod_get();
 void lowered_mod_set(bool pressed);

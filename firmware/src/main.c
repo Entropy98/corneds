@@ -33,6 +33,7 @@ int main(void) {
     tud_task();
 
     if(get_ms_slice() != 0) {
+      decrement_key_cooldowns();
       poll_keypresses();
       if(line_state == USB_CONNECTED) {
         send_hid_report(get_keypress());

@@ -55,9 +55,9 @@ static void rx_irq(){
     }
     if((pkt & XBOARD_PKT_COL_MASK) != XBOARD_PKT_INVALID){
       #ifdef KBDSIDE_RIGHT
-        push_keypress(pkt & XBOARD_PKT_COL_MASK,(pkt & XBOARD_PKT_ROW_MASK) >> 4, false);
+        push_keypress(pkt & XBOARD_PKT_COL_MASK,(pkt & XBOARD_PKT_ROW_MASK) >> 4, false, true);
       #else
-        push_keypress(pkt & XBOARD_PKT_COL_MASK,(pkt & XBOARD_PKT_ROW_MASK) >> 4, true);
+        push_keypress(pkt & XBOARD_PKT_COL_MASK,(pkt & XBOARD_PKT_ROW_MASK) >> 4, true, true);
       #endif
     }
   }
