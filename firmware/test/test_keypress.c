@@ -1,7 +1,7 @@
 /*
  * \file test_keypress.c
  * \author Harper Weigle
- * \date Nov 14 2023
+ * \date Nov 21 2023
  * \brief Testing if keypresses are read properly
  *        Sends the keys "[cX, rY]" where X is the column of the key pressed
  *        and Y is the row of the key pressed
@@ -22,7 +22,7 @@
 #define ROW_IDX 6U
 
 // Can treat all rows as the same because we're just looking at coordinates. Not mapping to keys
-static uint8_t row_masks[NUM_ROWS + 1] = {ROW0_MASK, ROW1_MASK, ROW2_MASK, ROW3_MASK};
+static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK, ROW3_MASK};
 static uint8_t cols[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYCOL3_PIN, KEYCOL4_PIN, KEYCOL5_PIN};
 
 static uint8_t num_keys[NUM_COLS] = {HID_KEY_0, HID_KEY_1, HID_KEY_2, HID_KEY_3, HID_KEY_4, HID_KEY_5};
@@ -56,14 +56,11 @@ int main(void) {
             key = 0;
           }
         }
-        else {
-          tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
-        }
       }
       else{
         gpio_put(cols[col], true);
         keys_pressed = gpio_get_all();
-        for(uint8_t row=0; row<(NUM_ROWS + 1); row++){
+        for(uint8_t row=0; row<(NUM_ROWS); row++){
           if(keys_pressed & row_masks[row]){
             key_array[COL_IDX] = num_keys[col];
             key_array[ROW_IDX] = num_keys[row];

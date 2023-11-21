@@ -1,7 +1,7 @@
 /*
  * \file keymap.h
  * \author Harper Weigle
- * \date Nov 14 2023
+ * \date Nov 21 2023
  * \brief mapping of keys to functions
  */
 
@@ -35,20 +35,25 @@
 #define ROW3_MASK 0x20
 
 #define NUM_COLS 6
-#define NUM_ROWS 3
+#define NUM_ROWS 4
 #define KEY_BUFFER_SIZE 50
+
+#define SHIFT_ROW 2
+#define SHIFT_COL 0
+#define MOD_ROW   3
+#define MOD_COL   4
 
 typedef uint8_t keymap_t[3][6];
 
 void init_keys(bool is_main);
 void poll_keypresses();
-void push_keypress(uint8_t col, uint8_t row);
+void push_keypress(uint8_t col, uint8_t row, bool is_right_side);
 uint8_t get_keypress();
 bool lowered_mod_get();
 void lowered_mod_set(bool pressed);
 bool raised_mod_get();
 void raised_mod_set(bool pressed);
 bool shift_get();
-void shift_set(bool pressed);
+void shift_set(bool pressed, bool right_side);
 
 #endif //_INC_KEYMAP_H

@@ -1,7 +1,7 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Nov 16 2023
+ * \date Nov 21 2023
  * \brief Firmware for corneDS split 40% keyboard
  */
 
@@ -23,10 +23,10 @@ int main(void) {
   init_time_slices();
   board_init();
   tusb_init();
-  xboard_comms_init();
 
   uint8_t line_state = usb_detected();
 
+  xboard_comms_init(line_state == USB_CONNECTED);
   init_keys(line_state == USB_CONNECTED);
   while(1) {
     update_time_slices();
@@ -52,6 +52,9 @@ int main(void) {
     }
 
     if(get_s_slice() != 0) {
+      if(line_state != USB_CONNECTED){
+        led_toggle();
+      }
       clear_s_slice();
     }
 

@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Nov 14 2023
+ * \date Nov 21 2023
  * \brief mapping of keys to functions
  */
 
@@ -17,18 +17,19 @@
 
 static bool main_kbd = true;
 
-static uint8_t key_buffer[KEY_BUFFER_SIZE];
+static volatile uint8_t key_buffer[KEY_BUFFER_SIZE];
 static uint8_t key_buffer_head = 0;
 static uint8_t key_buffer_foot = 0;
 
-static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK};
-static uint8_t cols[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYCOL3_PIN, KEYCOL4_PIN, KEYCOL5_PIN};
+static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK, ROW3_MASK};
+static uint8_t col_pins[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYCOL3_PIN, KEYCOL4_PIN, KEYCOL5_PIN};
 
 static bool keys_initialized = false;
 
-static bool raised = false;
-static bool lowered = false;
-static bool shifted = false;
+static volatile bool raised = false;
+static volatile bool lowered = false;
+static volatile bool r_shifted = false;
+static volatile bool l_shifted = false;
 
 static keymap_t normal_map_r = {{ HID_KEY_Y,    HID_KEY_U,    HID_KEY_I,     HID_KEY_O,      HID_KEY_P,         HID_KEY_BACKSPACE},
                                 { HID_KEY_H,    HID_KEY_J,    HID_KEY_K,     HID_KEY_L,      HID_KEY_SEMICOLON, HID_KEY_APOSTROPHE},
@@ -111,46 +112,6 @@ static uint8_t key_buffer_pop(){
 }
 
 /*
- * \fn void populate_key_rows(uint8_t col, uint32_t keys_pressed)
- * \brief local helper function for pushing all pressed rows given a column or sending them to the main keyboard
- * \param uint8_t col - column asserted at time of function call
- * \param uint32_t keys_pressed - keys pressed at time of function call
- */
-static void populate_key_rows(uint8_t col, uint32_t keys_pressed){
-  for(uint8_t row = 0; row < NUM_ROWS; row++){
-    if(key_buffer_full()) break;
-    if(keys_pressed & row_masks[row]){
-      if(main_kbd){
-        if(raised){
-          #ifdef KBDSIDE_RIGHT
-          key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
-          #else
-          key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
-          #endif //KBDSIDE
-        }
-        else if(lowered){
-          #ifdef KBDSIDE_RIGHT
-          key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
-          #else
-          key_buffer_push(lowered_map_l[row][NUM_COLS - 1 - col]);
-          #endif //KBDSIDE
-        }
-        else{
-          #ifdef KBDSIDE_RIGHT
-          key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
-          #else
-          key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
-          #endif //KBDSIDE
-        }
-      }
-      else{
-        xboard_comms_send(row, col);
-      }
-    }
-  }
-}
-
-/*
  * \fn void init_keys()
  * \brief initializes the appropraite GPIOs
  * \param bool is_main - true if this device is connected to USB
@@ -197,76 +158,74 @@ void init_keys(bool is_main) {
  * \brief populates key_buffer with pressed keys
  */
 void poll_keypresses() {
-  uint32_t keys_pressed = 0;
+  uint32_t keys_pressed_by_col[NUM_COLS] = {0};
 
   if(!key_buffer_full()){
-    gpio_put(KEYCOL4_PIN, true);
-    keys_pressed = gpio_get_all();
-
-    #ifdef KBDSIDE_RIGHT
-    if(keys_pressed & ROW3_MASK){
-      lowered_mod_set(true);
+    for(uint8_t col=0; col<NUM_COLS; col++){
+      gpio_put(col_pins[col], true);
+      keys_pressed_by_col[col] = gpio_get_all();
+      gpio_put(col_pins[col], false);
     }
-    else{
-      lowered_mod_set(false);
+
+    for(uint8_t col=0; col<NUM_COLS; col++){
+      for(uint8_t row=0; row<NUM_ROWS; row++){
+        if(keys_pressed_by_col[col] & row_masks[row]){
+          if((col == SHIFT_COL) && (row == SHIFT_ROW)){
+            #ifdef KBDSIDE_RIGHT
+              shift_set(true, true);
+            #else
+              shift_set(true, false);
+            #endif
+          }
+          else if ((col == MOD_COL) && (row == MOD_ROW)) {
+            #ifdef KBDSIDE_RIGHT
+              raised_mod_set(true);
+            #else
+              lowered_mod_set(true);
+            #endif
+          }
+
+          if(main_kbd){
+            #ifdef KBDSIDE_RIGHT
+              push_keypress(col, row, true);
+            #else
+              push_keypress(col, row, false);
+            #endif
+          }
+          else {
+            #ifdef KBDSIDE_RIGHT
+              xboard_comms_send(col, row, raised_mod_get(), shift_get());
+            #else
+              xboard_comms_send(col, row, lowered_mod_get(), shift_get());
+            #endif
+          }
+        }
+        else {
+          if((col == SHIFT_COL) && (row == SHIFT_ROW)){
+            #ifdef KBDSIDE_RIGHT
+            shift_set(false, true);
+            #else
+            shift_set(false, false);
+            #endif
+          }
+          else if ((col == MOD_COL) && (row == MOD_ROW)) {
+            #ifdef KBDSIDE_RIGHT
+              raised_mod_set(false);
+            #else
+              lowered_mod_set(false);
+            #endif
+          }
+
+          if(!main_kbd){
+            #ifdef KBDSIDE_RIGHT
+              xboard_comms_send(XBOARD_PKT_INVALID, row, raised_mod_get(), shift_get());
+            #else
+              xboard_comms_send(XBOARD_PKT_INVALID, row, lowered_mod_get(), shift_get());
+            #endif
+          }
+        }
+      }
     }
-    #else
-    if(keys_pressed & ROW3_MASK){
-      raised_mod_set(true);
-    }
-    else{
-      raised_mod_set(false);
-    }
-    #endif //KBDSIDE
-
-    populate_key_rows(4, keys_pressed);
-    gpio_put(KEYCOL4_PIN, false);
-  }
-
-  if(!key_buffer_full()){
-    gpio_put(KEYCOL5_PIN, true);
-    keys_pressed = gpio_get_all();
-    #ifdef KBDSIDE_RIGHT
-    if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ENTER);
-    #else
-    if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_SPACE);
-    #endif //KBDSIDE
-    populate_key_rows(5, keys_pressed);
-    gpio_put(KEYCOL5_PIN, false);
-  }
-
-  if(!key_buffer_full()){
-    gpio_put(KEYCOL3_PIN, true);
-    keys_pressed = gpio_get_all();
-    #ifdef KBDSIDE_RIGHT
-    if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_ALT_RIGHT);
-    #else
-    if(keys_pressed & ROW3_MASK) key_buffer_push(HID_KEY_GUI_RIGHT);
-    #endif //KBDSIDE
-    populate_key_rows(3, keys_pressed);
-    gpio_put(KEYCOL3_PIN, false);
-  }
-
-  if(!key_buffer_full()){
-    gpio_put(KEYCOL0_PIN, true);
-    keys_pressed = gpio_get_all();
-    if(keys_pressed & ROW2_MASK) {
-      shift_set(true);
-    }
-    else {
-      shift_set(false);
-    }
-    populate_key_rows(0, keys_pressed);
-    gpio_put(KEYCOL0_PIN, false);
-  }
-
-  for(uint8_t col=1; col < (NUM_COLS - 3); col++){
-    if(key_buffer_full()) break;
-
-    gpio_put(cols[col], true);
-    keys_pressed = gpio_get_all();
-    populate_key_rows(col, keys_pressed);
-    gpio_put(cols[col], false);
   }
 }
 
@@ -275,46 +234,52 @@ void poll_keypresses() {
  * \brief Push a specific key to the key buffer
  * \param uint8_t col - column of the key pressed
  * \param uint8_t row - row of the key pressed
+ * \param bool is_right_side - push key from the right side
  */
-void push_keypress(uint8_t col, uint8_t row){
+void push_keypress(uint8_t col, uint8_t row, bool is_right_side){
   if(!key_buffer_full()){
     if(row < 3){
       if(raised_mod_get()){
-        #ifdef KBDSIDE_RIGHT
-        key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
-        #else
-        key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
-        #endif //KBDSIDE
+        if(is_right_side){
+          key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
+        }
+        else{
+          key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
+        }
       }
       else if(lowered_mod_get()){
-        #ifdef KBDSIDE_RIGHT
-        key_buffer_push(lowered_map_l[row][NUM_COLS - 1 - col]);
-        #else
-        key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
-        #endif //KBDSIDE
+        if(is_right_side){
+          key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
+        }
+        else{
+          key_buffer_push(lowered_map_l[row][NUM_COLS - 1 - col]);
+        }
       }
       else{
-        #ifdef KBDSIDE_RIGHT
-        key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
-        #else
-        key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
-        #endif //KBDSIDE
+        if(is_right_side){
+          key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
+        }
+        else{
+          key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
+        }
       }
     }
     else{ // mod row. The mod key is handled in the packet information
       if(col == 5){
-        #ifdef KBDSIDE_RIGHT
-        key_buffer_push(HID_KEY_ENTER);
-        #else
-        key_buffer_push(HID_KEY_SPACE);
-        #endif //KBDSIDE
+        if(is_right_side){
+          key_buffer_push(HID_KEY_ENTER);
+        }
+        else{
+          key_buffer_push(HID_KEY_SPACE);
+        }
       }
       else if(col == 3){
-        #ifdef KBDSIDE_RIGHT
-        key_buffer_push(HID_KEY_ALT_RIGHT);
-        #else
-        key_buffer_push(HID_KEY_GUI_RIGHT);
-        #endif //KBDSIDE
+        if(is_right_side){
+          key_buffer_push(HID_KEY_ALT_RIGHT);
+        }
+        else {
+          key_buffer_push(HID_KEY_GUI_RIGHT);
+        }
       }
     }
   }
@@ -367,15 +332,22 @@ void lowered_mod_set(bool pressed){
  * \brief getter for shift
  */
 bool shift_get(){
-  return shifted;
+  return r_shifted || l_shifted;
 }
 
 /*
  * \fn void shift_set(bool pressed)
  * \brief setter for shift
+ * \param pressed - whether to set or unset shift
+ * \param right_side - true if setting right side
  */
-void shift_set(bool pressed){
-  shifted = pressed;
+void shift_set(bool pressed, bool right_side){
+  if(right_side){
+    r_shifted = pressed;
+  }
+  else {
+    l_shifted = pressed;
+  }
 }
 
 #endif //_SRC_KEYMAP_C
