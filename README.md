@@ -12,10 +12,10 @@
 # To Do
 ## PCB
  * Mounting holes are way too big. The units are probably wrong in KiCAD. They should be shrunk
- * Debug UART has CTS and VCC switched
- * UART on GP6 and GP7 but need to be on GP4 and GP5 to be on a UART bus
- * Add resistor to determine left or right
- * Add reset button
+ * ~~Debug UART has CTS and VCC switched~~
+ * ~~UART on GP6 and GP7 but need to be on GP4 and GP5 to be on a UART bus~~
+ * ~~Add resistor to determine left or right~~
+ * ~~Add reset button~~
 
 ## Hardware
  * Modify top plate to not cover RPi. It won't fit
