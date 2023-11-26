@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Nov 21 2023
+ * \date Nov 25 2023
  * \brief mapping of keys to functions
  */
 
@@ -26,6 +26,8 @@ static uint8_t col_pins[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYC
 
 static bool keys_initialized = false;
 
+static volatile bool alted = false;
+static volatile bool guied = false;
 static volatile bool raised = false;
 static volatile bool lowered = false;
 static volatile bool r_shifted = false;
@@ -111,6 +113,24 @@ static uint8_t key_buffer_pop(){
   }
 
   return keycode;
+}
+
+/*
+ * \fn bool alt_Get()
+ * \brief getter for alt press state
+ * \returns true if alt is pressed
+ */
+bool alt_get() {
+  return alted;
+}
+
+/*
+ * \fn void alt_set()
+ * \brief setter for alt press state
+ * \param pressed - whether or not alt is pressed
+ */
+void alt_set(bool pressed) {
+  alted = pressed;
 }
 
 /*
@@ -200,6 +220,13 @@ void poll_keypresses() {
               lowered_mod_set(true);
             #endif
           }
+          else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
+            #ifdef KBDSIDE_RIGHT
+              alt_set(true);
+            #else
+              gui_set(true);
+            #endif
+          }
 
           if(main_kbd){
             #ifdef KBDSIDE_RIGHT
@@ -210,11 +237,7 @@ void poll_keypresses() {
           }
           else {
             if(key_cooldowns[row][col] == 0U){
-              #ifdef KBDSIDE_RIGHT
-                xboard_comms_send(col, row, raised_mod_get(), shift_get());
-              #else
-                xboard_comms_send(col, row, lowered_mod_get(), shift_get());
-              #endif
+              xboard_comms_send(col, row);
               key_cooldowns[row][col] = KEY_COOLDOWN_MS;
             }
           }
@@ -234,13 +257,16 @@ void poll_keypresses() {
               lowered_mod_set(false);
             #endif
           }
+          else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
+            #ifdef KBDSIDE_RIGHT
+              alt_set(false);
+            #else
+              gui_set(false);
+            #endif
+          }
 
           if(!main_kbd){
-            #ifdef KBDSIDE_RIGHT
-              xboard_comms_send(XBOARD_PKT_INVALID, row, raised_mod_get(), shift_get());
-            #else
-              xboard_comms_send(XBOARD_PKT_INVALID, row, lowered_mod_get(), shift_get());
-            #endif
+            xboard_comms_send(XBOARD_PKT_INVALID, XBOARD_PKT_INVALID);
           }
         }
       }
@@ -313,6 +339,24 @@ void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_coo
  */
 uint8_t get_keypress() {
   return key_buffer_pop();
+}
+
+/*
+ * \fn bool gui_get()
+ * \brief getter for the gui press state
+ * \returns true if gui is pressed
+ */
+bool gui_get() {
+  return guied;
+}
+
+/*
+ * \fn void gui_set()
+ * \brief setter for the gui press state
+ * \param pressed - true if gui is pressed
+ */
+void gui_set(bool pressed) {
+  guied = pressed;
 }
 
 /*

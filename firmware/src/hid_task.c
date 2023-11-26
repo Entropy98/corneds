@@ -1,7 +1,7 @@
 /*
  * \file hid_task.c
  * \author Harper Weigle
- * \date Apr 18 2023
+ * \date Nov 25 2023
  * \brief task to take care of HID USB device needs
  */
 
@@ -25,9 +25,25 @@ void send_hid_report(uint8_t raw_code) {
 
   if(shift_get()){
     #ifdef KBDSIDE_RIGHT
-    modifier = KEYBOARD_MODIFIER_LEFTSHIFT;
-    #else
     modifier = KEYBOARD_MODIFIER_RIGHTSHIFT;
+    #else
+    modifier = KEYBOARD_MODIFIER_LEFTSHIFT;
+    #endif
+    keycode[0] = raw_code;
+  }
+  else if(gui_get()) {
+    #ifdef KBDSIDE_RIGHT
+    modifier = KEYBOARD_MODIFIER_LEFTGUI;
+    #else
+    modifier = KEYBOARD_MODIFIER_RIGHTGUI;
+    #endif
+    keycode[0] = raw_code;
+  }
+  else if(alt_get()) {
+    #ifdef KBDSIDE_RIGHT
+    modifier = KEYBOARD_MODIFIER_RIGHTALT;
+    #else
+    modifier = KEYBOARD_MODIFIER_LEFTALT;
     #endif
     keycode[0] = raw_code;
   }

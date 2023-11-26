@@ -1,7 +1,7 @@
 /*
  * \file keymap.h
  * \author Harper Weigle
- * \date Nov 21 2023
+ * \date Nov 25 2023
  * \brief mapping of keys to functions
  */
 
@@ -38,20 +38,26 @@
 #define NUM_ROWS 4
 #define KEY_BUFFER_SIZE 50
 
-#define SHIFT_ROW 2
-#define SHIFT_COL 0
-#define MOD_ROW   3
-#define MOD_COL   4
+#define ALTGUI_ROW 3
+#define ALTGUI_COL 3
+#define SHIFT_ROW  2
+#define SHIFT_COL  0
+#define MOD_ROW    3
+#define MOD_COL    4
 
 #define KEY_COOLDOWN_MS 30U
 
 typedef uint8_t keymap_t[3][6];
 
+bool alt_get();
+void alt_set(bool pressed);
 void decrement_key_cooldowns();
 void init_keys(bool is_main);
 void poll_keypresses();
 void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_cooldown);
 uint8_t get_keypress();
+bool gui_get();
+void gui_set(bool pressed);
 bool lowered_mod_get();
 void lowered_mod_set(bool pressed);
 bool raised_mod_get();

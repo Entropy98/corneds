@@ -1,7 +1,7 @@
 /*
  * \file xboard_comms.c
  * \author Harper Weigle
- * \date Nov 21 2023
+ * \date Nov 25 2023
  * \brief interfacing between sides of the keyboard
  */
 
@@ -23,8 +23,28 @@
  * \brief Pushes a key to the key buffer on UART interrupt. Inspired from pico sdk example
  */
 static void rx_irq(){
+  uint8_t col = 0;
+  uint8_t key = 0;
+  uint8_t pkt = 0;
+  uint8_t row = 0;
+
   while(uart_is_readable(uart0)){
-    uint8_t pkt = uart_getc(uart0);
+    pkt = uart_getc(uart0);
+
+    if(pkt & XBOARD_PKT_ALTGUI_BIT){
+      #ifdef KBDSIDE_RIGHT
+        gui_set(true);
+      #else
+        alt_set(true);
+      #endif
+    }
+    else{
+      #ifdef KBDSIDE_RIGHT
+        gui_set(false);
+      #else
+        alt_set(false);
+      #endif
+    }
     if(pkt & XBOARD_PKT_MOD_BIT){
       #ifdef KBDSIDE_RIGHT
       lowered_mod_set(true);
@@ -53,11 +73,20 @@ static void rx_irq(){
         shift_set(false, true);
       #endif
     }
-    if((pkt & XBOARD_PKT_COL_MASK) != XBOARD_PKT_INVALID){
+    key = pkt & XBOARD_PKT_KEY_MASK;
+    if(key != XBOARD_PKT_INVALID){
+      row = key / NUM_COLS;
+      if(row >= 3){
+      col = (key % NUM_COLS) + 3;
+      }
+      else{
+      col = key % NUM_COLS;
+
+      }
       #ifdef KBDSIDE_RIGHT
-        push_keypress(pkt & XBOARD_PKT_COL_MASK,(pkt & XBOARD_PKT_ROW_MASK) >> 4, false, true);
+        push_keypress(col, row, false, true);
       #else
-        push_keypress(pkt & XBOARD_PKT_COL_MASK,(pkt & XBOARD_PKT_ROW_MASK) >> 4, true, true);
+        push_keypress(col, row, true, true);
       #endif
     }
   }
@@ -89,16 +118,30 @@ void xboard_comms_init(bool is_main){
  * \fn void xboard_comms_send(uint8_t col, uint8_t row);
  * \brief Sends a key press packet to the other keyboard
  * \param col - column of the key pressed or XBOARD_PKT_INVALID
- * \param row - row of the key pressed
- * \param is_modded - if the mod key is pressed
- * \param is_shifted - if the shift key is pressed
+ * \param row - row of the key pressed or XBOARD_PKT_INVALID
  */
-void xboard_comms_send(uint8_t col, uint8_t row, bool is_modded, bool is_shifted){
+void xboard_comms_send(uint8_t col, uint8_t row){
+  uint8_t key = 0;
   uint8_t pkt = 0;
-  pkt |= is_modded ? XBOARD_PKT_MOD_BIT : 0;
-  pkt |= is_shifted ? XBOARD_PKT_SHIFT_BIT : 0;
-  pkt |= ((row << 4)) & XBOARD_PKT_ROW_MASK;
-  pkt |= col & XBOARD_PKT_COL_MASK;
+
+  #ifdef KBDSIDE_RIGHT
+    pkt |= raised_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
+    pkt |= alt_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
+  #else
+    pkt |= lowered_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
+    pkt |= gui_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
+  #endif
+
+  pkt |= shift_get() ? XBOARD_PKT_SHIFT_BIT : 0;
+
+  if((col == XBOARD_PKT_INVALID) || (row == XBOARD_PKT_INVALID)){
+    key |= XBOARD_PKT_INVALID;
+  }
+  else {
+    key = ((row * NUM_COLS) + col) & XBOARD_PKT_KEY_MASK;
+  }
+  pkt |= key;
+
   uart_putc_raw(uart0, pkt);
 }
 

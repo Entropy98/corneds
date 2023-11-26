@@ -101,7 +101,7 @@ int main(void) {
       }
       else{
         if(pkt_recevied){
-          if((pkt & XBOARD_PKT_COL_MASK) != XBOARD_PKT_INVALID){
+          if((pkt & XBOARD_PKT_KEY_MASK) != XBOARD_PKT_INVALID){
             key_array[1] = nibble2HIDKEY(pkt >> 4);
             key_array[2] = nibble2HIDKEY(pkt);
             msg_rdy = true;
