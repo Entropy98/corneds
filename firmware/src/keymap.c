@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Nov 25 2023
+ * \date Dec 03 2023
  * \brief mapping of keys to functions
  */
 
@@ -16,6 +16,7 @@
 #include "xboard_comms.h"
 
 static bool main_kbd = true;
+static uint8_t kbd_side = 0U;
 
 static volatile uint8_t key_buffer[KEY_BUFFER_SIZE];
 static uint8_t key_buffer_head = 0;
@@ -32,6 +33,7 @@ static volatile bool raised = false;
 static volatile bool lowered = false;
 static volatile bool r_shifted = false;
 static volatile bool l_shifted = false;
+static volatile bool change_queued = false;
 
 static keymap_t normal_map_r = {{ HID_KEY_Y,    HID_KEY_U,    HID_KEY_I,     HID_KEY_O,      HID_KEY_P,         HID_KEY_BACKSPACE},
                                 { HID_KEY_H,    HID_KEY_J,    HID_KEY_K,     HID_KEY_L,      HID_KEY_SEMICOLON, HID_KEY_APOSTROPHE},
@@ -163,6 +165,7 @@ void init_keys(bool is_main) {
   gpio_init(KEYCOL3_PIN);
   gpio_init(KEYCOL4_PIN);
   gpio_init(KEYCOL5_PIN);
+  gpio_init(SIDESELECT_PIN);
 
   gpio_set_function(KEYROW0_PIN, GPIO_FUNC_SIO);
   gpio_set_function(KEYROW1_PIN, GPIO_FUNC_SIO);
@@ -174,6 +177,7 @@ void init_keys(bool is_main) {
   gpio_set_function(KEYCOL3_PIN, GPIO_FUNC_SIO);
   gpio_set_function(KEYCOL4_PIN, GPIO_FUNC_SIO);
   gpio_set_function(KEYCOL5_PIN, GPIO_FUNC_SIO);
+  gpio_set_function(SIDESELECT_PIN, GPIO_FUNC_SIO);
 
   gpio_set_dir(KEYROW0_PIN, GPIO_IN);
   gpio_set_dir(KEYROW1_PIN, GPIO_IN);
@@ -185,8 +189,24 @@ void init_keys(bool is_main) {
   gpio_set_dir(KEYCOL3_PIN, GPIO_OUT);
   gpio_set_dir(KEYCOL4_PIN, GPIO_OUT);
   gpio_set_dir(KEYCOL5_PIN, GPIO_OUT);
+  gpio_set_dir(SIDESELECT_PIN, GPIO_IN);
 
   main_kbd = is_main;
+  if (gpio_get(SIDESELECT_PIN) == 0U) {
+    kbd_side = KBDSIDE_RIGHT;
+  }
+  else {
+    kbd_side = KBDSIDE_LEFT;
+  }
+}
+
+/*
+ * \fn uint8_t kbd_side_get()
+ * \brief gets the board side
+ * \returns KBDSIDE_RIGHT if right side and KBDSIDE_LEFT otherwise
+ */
+uint8_t kbd_side_get(){
+  return kbd_side;
 }
 
 /*
@@ -207,66 +227,72 @@ void poll_keypresses() {
       for(uint8_t row=0; row<NUM_ROWS; row++){
         if(keys_pressed_by_col[col] & row_masks[row]){
           if((col == SHIFT_COL) && (row == SHIFT_ROW)){
-            #ifdef KBDSIDE_RIGHT
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
               shift_set(true, true);
-            #else
+            }
+            else {
               shift_set(true, false);
-            #endif
+            }
           }
           else if ((col == MOD_COL) && (row == MOD_ROW)) {
-            #ifdef KBDSIDE_RIGHT
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
               raised_mod_set(true);
-            #else
+            }
+            else {
               lowered_mod_set(true);
-            #endif
+            }
           }
           else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
-            #ifdef KBDSIDE_RIGHT
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
               alt_set(true);
-            #else
+            }
+            else {
               gui_set(true);
-            #endif
+            }
           }
 
           if(main_kbd){
-            #ifdef KBDSIDE_RIGHT
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
               push_keypress(col, row, true, false);
-            #else
-              push_keypress(col, row, false, false);
-            #endif
-          }
-          else {
-            if(key_cooldowns[row][col] == 0U){
-              xboard_comms_send(col, row);
-              key_cooldowns[row][col] = KEY_COOLDOWN_MS;
             }
+            else {
+              push_keypress(col, row, false, false);
+            }
+          }
+          if(key_cooldowns[row][col] == 0U){
+            xboard_comms_send(col, row);
+            key_cooldowns[row][col] = KEY_COOLDOWN_MS;
           }
         }
         else {
           if((col == SHIFT_COL) && (row == SHIFT_ROW)){
-            #ifdef KBDSIDE_RIGHT
-            shift_set(false, true);
-            #else
-            shift_set(false, false);
-            #endif
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
+              shift_set(false, true);
+            }
+            else {
+              shift_set(false, false);
+            }
           }
           else if ((col == MOD_COL) && (row == MOD_ROW)) {
-            #ifdef KBDSIDE_RIGHT
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
               raised_mod_set(false);
-            #else
+            }
+            else {
               lowered_mod_set(false);
-            #endif
+            }
           }
           else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
-            #ifdef KBDSIDE_RIGHT
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
               alt_set(false);
-            #else
+            }
+            else {
               gui_set(false);
-            #endif
+            }
           }
 
-          if(!main_kbd){
+          if(change_queued){
             xboard_comms_send(XBOARD_PKT_INVALID, XBOARD_PKT_INVALID);
+            change_queued = false;
           }
         }
       }
@@ -356,7 +382,10 @@ bool gui_get() {
  * \param pressed - true if gui is pressed
  */
 void gui_set(bool pressed) {
-  guied = pressed;
+  if(guied != pressed){
+    guied = pressed;
+    change_queued = true;
+  }
 }
 
 /*
@@ -373,7 +402,10 @@ bool raised_mod_get(){
  * \brief setter for raised mod
  */
 void raised_mod_set(bool pressed){
-  raised = pressed;
+  if(raised != pressed){
+    raised = pressed;
+    change_queued = true;
+  }
 }
 
 /*
@@ -389,7 +421,10 @@ bool lowered_mod_get(){
  * \brief setter for raised mod
  */
 void lowered_mod_set(bool pressed){
-  lowered = pressed;
+  if(lowered != pressed) {
+    lowered = pressed;
+    change_queued = true;
+  }
 }
 
 /*
@@ -408,10 +443,16 @@ bool shift_get(){
  */
 void shift_set(bool pressed, bool right_side){
   if(right_side){
-    r_shifted = pressed;
+    if(r_shifted != pressed) {
+      r_shifted = pressed;
+      change_queued = true;
+    }
   }
   else {
-    l_shifted = pressed;
+    if(l_shifted != pressed) {
+      l_shifted = pressed;
+      change_queued = true;
+    }
   }
 }
 

@@ -11,11 +11,6 @@
 
 # To Do
 ## PCB
- * Mounting holes are way too big. The units are probably wrong in KiCAD. They should be shrunk
- * ~~Debug UART has CTS and VCC switched~~
- * ~~UART on GP6 and GP7 but need to be on GP4 and GP5 to be on a UART bus~~
- * ~~Add resistor to determine left or right~~
- * ~~Add reset button~~
 
 ## Hardware
  * Modify top plate to not cover RPi. It won't fit
@@ -23,7 +18,4 @@
 ## Firmware
  * Tests
    * test debug_print test
-    * debug uart on wrong ports
-   * write test to determine which board is which
-    * Need a pull-up/down resistor to determine which side is left or right
- * Everything works but multiple keys is hella buggy
+     * Print not working but pins should be right

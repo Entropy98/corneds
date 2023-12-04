@@ -19,6 +19,34 @@
 #define BAUD_RATE 115200
 
 /*
+ * \fn uint8_t keynum_to_col()
+ * \brief gets the column from the key number
+ * \param uint8_t keynum - key number
+ * \param uint8_t row - row of the key
+ * \returns column of the key
+ */
+static uint8_t keynum_to_col(uint8_t keynum, uint8_t row) {
+  uint8_t col = 0;
+  if(row >= 3){
+    col = (keynum % NUM_COLS) + 3;
+  }
+  else{
+    col = keynum % NUM_COLS;
+  }
+  return col;
+}
+
+/*
+ * \fn uint8_t keynum_to_row()
+ * \brief gets the row from the key number
+ * \param uint8_t keynum - key number
+ * \returns row of the key
+ */
+static uint8_t keynum_to_row(uint8_t keynum) {
+  return keynum / NUM_COLS;
+}
+
+/*
  * \fn void rx_irq()
  * \brief Pushes a key to the key buffer on UART interrupt. Inspired from pico sdk example
  */
@@ -32,62 +60,48 @@ static void rx_irq(){
     pkt = uart_getc(uart0);
 
     if(pkt & XBOARD_PKT_ALTGUI_BIT){
-      #ifdef KBDSIDE_RIGHT
+      if(kbd_side_get() == KBDSIDE_RIGHT){
         gui_set(true);
-      #else
+      }
+      else {
         alt_set(true);
-      #endif
+      }
     }
     else{
-      #ifdef KBDSIDE_RIGHT
+      if(kbd_side_get() == KBDSIDE_RIGHT){
         gui_set(false);
-      #else
+      }
+      else {
         alt_set(false);
-      #endif
+      }
     }
     if(pkt & XBOARD_PKT_MOD_BIT){
-      #ifdef KBDSIDE_RIGHT
-      lowered_mod_set(true);
-      #else
-      raised_mod_set(true);
-      #endif
+      if(kbd_side_get() == KBDSIDE_RIGHT){
+        lowered_mod_set(true);
+      }
+      else {
+        raised_mod_set(true);
+      }
     }
     else{
-      #ifdef KBDSIDE_RIGHT
-      lowered_mod_set(false);
-      #else
-      raised_mod_set(false);
-      #endif
+      if(kbd_side_get() == KBDSIDE_RIGHT){
+        lowered_mod_set(false);
+      }
+      else {
+        raised_mod_set(false);
+      }
     }
     if(pkt & XBOARD_PKT_SHIFT_BIT){
-      #ifdef KBDSIDE_RIGHT
-        shift_set(true, false);
-      #else
-        shift_set(true, true);
-      #endif
+      shift_set(true, kbd_side_get() == KBDSIDE_LEFT);
     }
     else{
-      #ifdef KBDSIDE_RIGHT
-        shift_set(false, false);
-      #else
-        shift_set(false, true);
-      #endif
+      shift_set(false, kbd_side_get() == KBDSIDE_LEFT);
     }
     key = pkt & XBOARD_PKT_KEY_MASK;
     if(key != XBOARD_PKT_INVALID){
-      row = key / NUM_COLS;
-      if(row >= 3){
-      col = (key % NUM_COLS) + 3;
-      }
-      else{
-      col = key % NUM_COLS;
-
-      }
-      #ifdef KBDSIDE_RIGHT
-        push_keypress(col, row, false, true);
-      #else
-        push_keypress(col, row, true, true);
-      #endif
+      row = keynum_to_row(key);
+      col = keynum_to_col(key, row);
+      push_keypress(col, row, kbd_side_get() == KBDSIDE_LEFT, true);
     }
   }
 }
@@ -124,13 +138,14 @@ void xboard_comms_send(uint8_t col, uint8_t row){
   uint8_t key = 0;
   uint8_t pkt = 0;
 
-  #ifdef KBDSIDE_RIGHT
+  if(kbd_side_get() == KBDSIDE_RIGHT){
     pkt |= raised_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
     pkt |= alt_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
-  #else
+  }
+  else {
     pkt |= lowered_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
     pkt |= gui_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
-  #endif
+  }
 
   pkt |= shift_get() ? XBOARD_PKT_SHIFT_BIT : 0;
 
@@ -138,7 +153,14 @@ void xboard_comms_send(uint8_t col, uint8_t row){
     key |= XBOARD_PKT_INVALID;
   }
   else {
-    key = ((row * NUM_COLS) + col) & XBOARD_PKT_KEY_MASK;
+    key = (row * NUM_COLS);
+    if(row == 3){
+      key += col - 3;
+    }
+    else{
+      key += col;
+    }
+    key &= XBOARD_PKT_KEY_MASK;
   }
   pkt |= key;
 

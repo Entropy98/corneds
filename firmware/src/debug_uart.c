@@ -1,7 +1,7 @@
 /*
  * \file debug_uart.c
  * \author Harper Weigle
- * \date Nov 12 2023
+ * \date Dec 03 2023
  * \brief uart print functions
  */
 
@@ -19,7 +19,7 @@
  */
 void debug_uart_init(){
   uart_init(UART_ID, BAUD_RATE);
-  gpio_set_function(DEBUGUARTRX_PIN, GPIO_FUNC_UART);
+  gpio_set_function(DEBUGUARTTX_PIN, GPIO_FUNC_UART);
   gpio_set_function(DEBUGUARTRX_PIN, GPIO_FUNC_UART);
 }
 

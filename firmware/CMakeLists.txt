@@ -6,10 +6,7 @@ project(corneds)
 
 pico_sdk_init()
 
-add_executable(${PROJECT_NAME}_right
-  src/main.c
-)
-add_executable(${PROJECT_NAME}_left
+add_executable(${PROJECT_NAME}
   src/main.c
 )
 
@@ -28,15 +25,9 @@ add_executable(${PROJECT_NAME}_test_xboard_comms
 )
 
 
-target_compile_options(${PROJECT_NAME}_right PUBLIC
+target_compile_options(${PROJECT_NAME} PUBLIC
   -g
   -O0
-  -DKBDSIDE_RIGHT
-)
-target_compile_options(${PROJECT_NAME}_left PUBLIC
-  -g
-  -O0
-  -DKBDSIDE_LEFT
 )
 
 # Tests
@@ -57,17 +48,7 @@ target_compile_options(${PROJECT_NAME}_test_xboard_comms PUBLIC
   -O0
 )
 
-target_sources(${PROJECT_NAME}_right PUBLIC
-  src/debug_uart.c
-  src/hid_task.c
-  src/keymap.c
-  src/led_utils.c
-  src/timeslice.c
-  src/usb_descriptors.c
-  src/usb_detect.c
-  src/xboard_comms.c
-)
-target_sources(${PROJECT_NAME}_left PUBLIC
+target_sources(${PROJECT_NAME} PUBLIC
   src/debug_uart.c
   src/hid_task.c
   src/keymap.c
@@ -115,8 +96,7 @@ target_sources(${PROJECT_NAME}_test_xboard_comms PUBLIC
 )
 
 
-target_include_directories(${PROJECT_NAME}_right PUBLIC inc)
-target_include_directories(${PROJECT_NAME}_left PUBLIC inc)
+target_include_directories(${PROJECT_NAME} PUBLIC inc)
 
 # Tests
 target_include_directories(${PROJECT_NAME}_test_debug_uart PUBLIC inc)
@@ -124,8 +104,7 @@ target_include_directories(${PROJECT_NAME}_test_keypress PUBLIC inc)
 target_include_directories(${PROJECT_NAME}_test_print PUBLIC inc)
 target_include_directories(${PROJECT_NAME}_test_xboard_comms PUBLIC inc)
 
-target_link_libraries(${PROJECT_NAME}_right pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
-target_link_libraries(${PROJECT_NAME}_left pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
+target_link_libraries(${PROJECT_NAME} pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
 
 # Tests
 target_link_libraries(${PROJECT_NAME}_test_debug_uart tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)

@@ -23,10 +23,6 @@
 #include "xboard_comms.h"
 
 #define NUM_KEYS  4U
-#define COL_IDX   2U
-#define ROW_IDX   6U
-#define SHIFT_IDX 10U
-#define MOD_IDX   14U
 
 static uint8_t key_array[NUM_KEYS] = {HID_KEY_P, 0, 0, HID_KEY_ENTER};
 
@@ -34,7 +30,7 @@ static volatile bool pkt_recevied = false;
 static volatile uint8_t pkt = 0;
 
 void test_rx_irq(){
-  while(uart_is_readable(uart0)){
+  while(uart_is_readable(uart0) && (!pkt_recevied)){
     pkt = uart_getc(uart0);
     pkt_recevied = true;
   }

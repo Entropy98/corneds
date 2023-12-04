@@ -19,9 +19,6 @@ int main(void) {
   init_time_slices();
   debug_uart_init();
 
-  uint8_t key = 0;
-  uint8_t keycode[6] = {0};
-
   while(true){
     update_time_slices();
     tud_task();

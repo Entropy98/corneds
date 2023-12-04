@@ -47,12 +47,16 @@
 
 #define KEY_COOLDOWN_MS 30U
 
+#define KBDSIDE_RIGHT 1U
+#define KBDSIDE_LEFT 2U
+
 typedef uint8_t keymap_t[3][6];
 
 bool alt_get();
 void alt_set(bool pressed);
 void decrement_key_cooldowns();
 void init_keys(bool is_main);
+uint8_t kbd_side_get();
 void poll_keypresses();
 void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_cooldown);
 uint8_t get_keypress();
