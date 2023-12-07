@@ -50,12 +50,7 @@
         }
       },
       "diff_pair_dimensions": [],
-      "drc_exclusions": [
-        "holes_co_located|136946000|48720000|2aeae70f-da82-4ec7-b6fb-e745545e1b95|b6acb422-fe90-474e-9f8c-ab74fca416a9",
-        "holes_co_located|136946000|85550000|9a6a432e-5eb6-4cba-b357-064a15b7ac78|f0055cb7-db47-49f4-99b2-421c6c36f98b",
-        "holes_co_located|141946000|48720000|23f51e37-bd98-4028-9e08-d00802b0bed7|378e5808-d9fd-4f9c-a912-9f3d5cb4aec8",
-        "holes_co_located|141946000|85550000|b9a1111f-3793-4c2e-997a-0f2f36525eb4|75771f89-f031-4d2e-8be6-819a81247dd0"
-      ],
+      "drc_exclusions": [],
       "meta": {
         "version": 2
       },
