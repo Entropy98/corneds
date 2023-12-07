@@ -1,7 +1,7 @@
 /*
  * \file pinmap.h
  * \author Harper Weigle
- * \date Dec 03 2023
+ * \date Dec 06 2023
  * \brief mapping of MCU pins
  */
 
@@ -10,13 +10,15 @@
 
 #define KEYCOL0_PIN  0
 #define KEYCOL1_PIN  1
+
 #define KEYROW0_PIN  2
 #define KEYROW1_PIN  3
-#define KEYROW2_PIN  6
-#define KEYROW3_PIN  7
 
 #define DEBUGUARTTX_PIN 4
 #define DEBUGUARTRX_PIN 5
+
+#define KEYROW2_PIN  6
+#define KEYROW3_PIN  7
 
 #define KEYCOL2_PIN  8
 #define KEYCOL3_PIN  9

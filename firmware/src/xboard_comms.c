@@ -1,7 +1,7 @@
 /*
  * \file xboard_comms.c
  * \author Harper Weigle
- * \date Nov 25 2023
+ * \date Dec 06 2023
  * \brief interfacing between sides of the keyboard
  */
 
@@ -16,6 +16,8 @@
 #include "pinmap.h"
 #include "xboard_comms.h"
 
+#define XBOARD_UART_ID uart0
+#define XBOARD_UART_IRQ UART0_IRQ
 #define BAUD_RATE 115200
 
 /*
@@ -56,8 +58,8 @@ static void rx_irq(){
   uint8_t pkt = 0;
   uint8_t row = 0;
 
-  while(uart_is_readable(uart0)){
-    pkt = uart_getc(uart0);
+  while(uart_is_readable(XBOARD_UART_ID)){
+    pkt = uart_getc(XBOARD_UART_ID);
 
     if(pkt & XBOARD_PKT_ALTGUI_BIT){
       if(kbd_side_get() == KBDSIDE_RIGHT){
@@ -113,17 +115,17 @@ static void rx_irq(){
  */
 void xboard_comms_init(bool is_main){
   // UART Initialization
-  uart_init(uart0, BAUD_RATE);
+  uart_init(XBOARD_UART_ID, BAUD_RATE);
   gpio_set_function(XBOARDTX_PIN, GPIO_FUNC_UART);
   gpio_set_function(XBOARDRX_PIN, GPIO_FUNC_UART);
-  uart_set_hw_flow(uart0, false, false);
-  uart_set_format(uart0, 8, 1, UART_PARITY_NONE);
-  uart_set_fifo_enabled(uart0, false);
+  uart_set_hw_flow(XBOARD_UART_ID, false, false);
+  uart_set_format(XBOARD_UART_ID, 8, 1, UART_PARITY_NONE);
+  uart_set_fifo_enabled(XBOARD_UART_ID, false);
 
   // Interrupt Initialization
   if(is_main){
-    irq_set_exclusive_handler(UART0_IRQ, rx_irq);
-    irq_set_enabled(UART0_IRQ, true);
+    irq_set_exclusive_handler(XBOARD_UART_IRQ, rx_irq);
+    irq_set_enabled(XBOARD_UART_IRQ, true);
     uart_set_irq_enables(uart0, true, false);
   }
 }

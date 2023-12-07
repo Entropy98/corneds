@@ -1,7 +1,7 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Dec 03 2023
+ * \date Dec 06 2023
  * \brief Firmware for corneDS split 40% keyboard
  */
 
@@ -19,10 +19,10 @@
 #include "xboard_comms.h"
 
 int main(void) {
+  board_init();
 
   led_init();
   init_time_slices();
-  board_init();
   tusb_init();
   debug_uart_init();
 

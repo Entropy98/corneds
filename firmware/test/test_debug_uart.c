@@ -1,7 +1,7 @@
 /*
  * \file test_debug_uart.c
  * \author Harper Weigle
- * \date Nov 13 2023
+ * \date Dec 06 2023
  * \brief Testing the debug uart interface
  *        Prints "Hello World\n" over the debug UART interface
  */
@@ -14,8 +14,9 @@
 #include "led_utils.h"
 
 int main(void) {
-  led_init();
   board_init();
+
+  led_init();
   init_time_slices();
   debug_uart_init();
 

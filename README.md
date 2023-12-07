@@ -11,6 +11,7 @@
 
 # To Do
 ## PCB
+ * Pins on left side didn't save
 
 ## Hardware
  * Modify top plate to not cover RPi. It won't fit
@@ -18,4 +19,4 @@
 ## Firmware
  * Tests
    * test debug_print test
-     * Print not working but pins should be right
+     * unclear why uart isn't working

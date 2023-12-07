@@ -1,7 +1,7 @@
 /*
  * \file test_keypress.c
  * \author Harper Weigle
- * \date Nov 21 2023
+ * \date Dec 06 2023
  * \brief Testing if keypresses are read properly
  *        Sends the keys "[cX, rY]" where X is the column of the key pressed
  *        and Y is the row of the key pressed
@@ -38,7 +38,7 @@ int main(void) {
   uint8_t key = 0;
   uint8_t keycode[6] = {0};
   uint32_t keys_pressed = 0;
-  bool key_pressed = false;
+  bool key_is_pressed = false;
   uint8_t col = 0;
 
   while(true){
@@ -46,13 +46,13 @@ int main(void) {
     tud_task();
 
     if(get_ms_slice() != 0) {
-      if(key_pressed){
+      if(key_is_pressed){
         if(tud_hid_ready()){
           keycode[0] = key_array[key];
           tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
           key++;
           if(key == (NUM_KEYS)){
-            key_pressed = false;
+            key_is_pressed = false;
             key = 0;
           }
         }
@@ -64,7 +64,7 @@ int main(void) {
           if(keys_pressed & row_masks[row]){
             key_array[COL_IDX] = num_keys[col];
             key_array[ROW_IDX] = num_keys[row];
-            key_pressed = true;
+            key_is_pressed = true;
           }
         }
         gpio_put(cols[col], false);

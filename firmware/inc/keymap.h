@@ -1,13 +1,14 @@
 /*
  * \file keymap.h
  * \author Harper Weigle
- * \date Nov 25 2023
+ * \date Dec 06 2023
  * \brief mapping of keys to functions
  */
 
 #ifndef _INC_KEYMAP_H
 #define _INC_KEYMAP_H
 
+#include "pinmap.h"
 #include "tusb.h"
 
 #define MACRO_AMPERSAND         0xFF
@@ -29,10 +30,10 @@
 #define MACRO_LESS_THAN         0xEF
 #define MACRO_GREATER_THAN      0xEE
 
-#define ROW0_MASK 0x04
-#define ROW1_MASK 0x08
-#define ROW2_MASK 0x10
-#define ROW3_MASK 0x20
+#define ROW0_MASK (0x01 << KEYROW0_PIN)
+#define ROW1_MASK (0x01 << KEYROW1_PIN)
+#define ROW2_MASK (0x01 << KEYROW2_PIN)
+#define ROW3_MASK (0x01 << KEYROW3_PIN)
 
 #define NUM_COLS 6
 #define NUM_ROWS 4
