@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Dec 12 2023
+ * \date Dec 13 2023
  * \brief mapping of keys to functions
  */
 
@@ -295,7 +295,6 @@ void poll_keypresses() {
 
           if(change_queued){
             xboard_comms_send(XBOARD_PKT_INVALID, XBOARD_PKT_INVALID);
-            change_queued = false;
           }
         }
       }
@@ -469,6 +468,15 @@ void shift_set(bool pressed, bool right_side){
       change_queued = true;
     }
   }
+}
+
+/*
+ * \fn void unset_change_queued()
+ * \brief unset the change queued flag after the changed have been sent to the
+ *        other board
+ */
+void unset_change_queued(){
+  change_queued = false;
 }
 
 #endif //_SRC_KEYMAP_C

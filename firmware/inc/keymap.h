@@ -1,7 +1,7 @@
 /*
  * \file keymap.h
  * \author Harper Weigle
- * \date Dec 12 2023
+ * \date Dec 13 2023
  * \brief mapping of keys to functions
  */
 
@@ -73,5 +73,6 @@ bool raised_mod_get();
 void raised_mod_set(bool pressed);
 uint8_t shift_get();
 void shift_set(bool pressed, bool right_side);
+void unset_change_queued();
 
 #endif //_INC_KEYMAP_H

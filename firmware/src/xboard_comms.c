@@ -1,7 +1,7 @@
 /*
  * \file xboard_comms.c
  * \author Harper Weigle
- * \date Dec 06 2023
+ * \date Dec 13 2023
  * \brief interfacing between sides of the keyboard
  */
 
@@ -167,6 +167,7 @@ void xboard_comms_send(uint8_t col, uint8_t row){
   pkt |= key;
 
   uart_putc_raw(uart0, pkt);
+  unset_change_queued();
 }
 
 #endif //_SRC_XBOARD_COMMS_C
