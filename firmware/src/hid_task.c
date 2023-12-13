@@ -33,7 +33,10 @@ void send_hid_report(uint8_t raw_code) {
     modifier |= KEYBOARD_MODIFIER_RIGHTALT;
   }
   if(gui_get()){
-    modifier |= KEYBOARD_MODIFIER_LEFTALT;
+    modifier |= KEYBOARD_MODIFIER_LEFTGUI;
+  }
+  if(ctrl_get()){
+    modifier |= KEYBOARD_MODIFIER_LEFTCTRL;
   }
 
   switch (raw_code) {

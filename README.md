@@ -20,4 +20,4 @@
  * Tests
    * test debug_print test
      * unclear why uart isn't working
- * Everything is sending with ALT_L
+ * A sends AS

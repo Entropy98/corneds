@@ -27,8 +27,9 @@ static uint8_t col_pins[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYC
 
 static bool keys_initialized = false;
 
-static volatile uint8_t alted = 0x0;
-static volatile uint8_t guied = 0x0;
+static volatile bool alted = false;
+static volatile bool ctrled = false;
+static volatile bool guied = false;
 static volatile uint8_t shifted = 0x0;
 
 static volatile bool raised = false;
@@ -118,7 +119,7 @@ static uint8_t key_buffer_pop(){
 }
 
 /*
- * \fn bool alt_Get()
+ * \fn bool alt_get()
  * \brief getter for alt press state
  * \returns true if alt is pressed
  */
@@ -135,6 +136,27 @@ void alt_set(bool pressed) {
   if(pressed != alted){
     change_queued = true;
     alted = pressed;
+  }
+}
+
+/*
+ * \fn bool ctrl_get()
+ * \brief getter for control press state
+ * \returns true if control is pressed
+ */
+bool ctrl_get() {
+  return ctrled;
+}
+
+/*
+ * \fn void ctrl_set()
+ * \brief setter for control press state
+ * \param pressed - whether or not control is pressed
+ */
+void ctrl_set(bool pressed) {
+  if(pressed != ctrled){
+    change_queued = true;
+    ctrled = pressed;
   }
 }
 
@@ -253,6 +275,11 @@ void poll_keypresses() {
               gui_set(true);
             }
           }
+          else if ((col == CTRL_COL) && (row == CTRL_ROW)) {
+            if(kbd_side_get() == KBDSIDE_LEFT) {
+              ctrl_set(true);
+            }
+          }
 
           if(main_kbd){
             if (kbd_side_get() == KBDSIDE_RIGHT) {
@@ -290,6 +317,11 @@ void poll_keypresses() {
             }
             else {
               gui_set(false);
+            }
+          }
+          else if ((col == CTRL_COL) && (row == CTRL_ROW)) {
+            if(kbd_side_get() == KBDSIDE_LEFT) {
+              ctrl_set(false);
             }
           }
 
@@ -340,21 +372,23 @@ void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_coo
       }
     }
     else{ // mod row. The mod key is handled in the packet information
-      if(col == 5){
-        if(is_right_side){
-          key_buffer_push(HID_KEY_ENTER);
-        }
-        else{
-          key_buffer_push(HID_KEY_SPACE);
-        }
-      }
-      else if(col == 3){
-        if(is_right_side){
-          key_buffer_push(HID_KEY_ALT_RIGHT);
-        }
-        else {
-          key_buffer_push(HID_KEY_GUI_RIGHT);
-        }
+      switch (col) {
+        case ALTGUI_COL:
+          if(is_right_side){
+            key_buffer_push(HID_KEY_ALT_RIGHT);
+          }
+          else {
+            key_buffer_push(HID_KEY_GUI_RIGHT);
+          }
+          break;
+        case ENTERSPACE_COL:
+          if(is_right_side){
+            key_buffer_push(HID_KEY_ENTER);
+          }
+          else{
+            key_buffer_push(HID_KEY_SPACE);
+          }
+          break;
       }
     }
   }

@@ -39,12 +39,16 @@
 #define NUM_ROWS 4
 #define KEY_BUFFER_SIZE 50
 
-#define ALTGUI_ROW 3
-#define ALTGUI_COL 3
-#define SHIFT_ROW  2
-#define SHIFT_COL  0
-#define MOD_ROW    3
-#define MOD_COL    4
+#define ALTGUI_ROW     3
+#define ALTGUI_COL     3
+#define CTRL_ROW       1
+#define CTRL_COL       0
+#define ENTERSPACE_COL 5
+#define ENTERSPACE_ROW 3
+#define SHIFT_ROW      2
+#define SHIFT_COL      0
+#define MOD_ROW        3
+#define MOD_COL        4
 
 #define MOD_MASK_RIGHT 0x1
 #define MOD_MASK_LEFT  0x2
@@ -59,6 +63,8 @@ typedef uint8_t keymap_t[3][6];
 
 bool alt_get();
 void alt_set(bool pressed);
+bool ctrl_get();
+void ctrl_set(bool pressed);
 void decrement_key_cooldowns();
 void init_keys(bool is_main);
 uint8_t kbd_side_get();

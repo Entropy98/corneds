@@ -54,56 +54,75 @@ static uint8_t keynum_to_row(uint8_t keynum) {
  */
 static void rx_irq(){
   uint8_t col = 0;
+  uint8_t header = 0;
   uint8_t key = 0;
   uint8_t pkt = 0;
   uint8_t row = 0;
 
   while(uart_is_readable(XBOARD_UART_ID)){
     pkt = uart_getc(XBOARD_UART_ID);
+    header = pkt & XBOARD_PKT_HEADER_MASK;
 
-    if(pkt & XBOARD_PKT_ALTGUI_BIT){
-      if(kbd_side_get() == KBDSIDE_RIGHT){
-        gui_set(true);
-      }
-      else {
-        alt_set(true);
-      }
-    }
-    else{
-      if(kbd_side_get() == KBDSIDE_RIGHT){
-        gui_set(false);
-      }
-      else {
-        alt_set(false);
-      }
-    }
-    if(pkt & XBOARD_PKT_MOD_BIT){
-      if(kbd_side_get() == KBDSIDE_RIGHT){
-        lowered_mod_set(true);
-      }
-      else {
-        raised_mod_set(true);
-      }
-    }
-    else{
-      if(kbd_side_get() == KBDSIDE_RIGHT){
-        lowered_mod_set(false);
-      }
-      else {
-        raised_mod_set(false);
-      }
-    }
-    if(pkt & XBOARD_PKT_SHIFT_BIT){
-      shift_set(true, kbd_side_get() == KBDSIDE_LEFT);
-    }
-    else{
-      shift_set(false, kbd_side_get() == KBDSIDE_LEFT);
-    }
-    key = pkt & XBOARD_PKT_KEY_MASK;
-    if(key != XBOARD_PKT_INVALID){
-      row = keynum_to_row(key);
-      col = keynum_to_col(key, row);
-      push_keypress(col, row, kbd_side_get() == KBDSIDE_LEFT, true);
+    switch (header) {
+      case XBOARD_PKT_KEY_HEADER:
+        key = (pkt & XBOARD_PKT_DATA_MASK);
+        if(key != XBOARD_PKT_INVALID){
+          row = keynum_to_row(key);
+          col = keynum_to_col(key, row);
+          push_keypress(col, row, kbd_side_get() == KBDSIDE_LEFT, true);
+        }
+        break;
+
+      case XBOARD_PKT_MOD_HEADER:
+        if(pkt & XBOARD_PKT_ALTGUI_BIT){
+          if(kbd_side_get() == KBDSIDE_RIGHT){
+            alt_set(true);
+          }
+          else {
+            gui_set(true);
+          }
+        }
+        else{
+          if(kbd_side_get() == KBDSIDE_RIGHT){
+            alt_set(false);
+          }
+          else {
+            gui_set(false);
+          }
+        }
+
+        if(pkt & XBOARD_PKT_MOD_BIT){
+          if(kbd_side_get() == KBDSIDE_RIGHT){
+            lowered_mod_set(true);
+          }
+          else {
+            raised_mod_set(true);
+          }
+        }
+        else{
+          if(kbd_side_get() == KBDSIDE_RIGHT){
+            lowered_mod_set(false);
+          }
+          else {
+            raised_mod_set(false);
+          }
+        }
+
+        if(pkt & XBOARD_PKT_SHIFT_BIT){
+          shift_set(true, kbd_side_get() == KBDSIDE_LEFT);
+        }
+        else{
+          shift_set(false, kbd_side_get() == KBDSIDE_LEFT);
+        }
+
+        if(pkt & XBOARD_PKT_CTRL_BIT){
+          ctrl_set(true);
+        }
+        else{
+          ctrl_set(false);
+        }
+
+        break;
     }
   }
 }
@@ -137,36 +156,39 @@ void xboard_comms_init(bool is_main){
  * \param row - row of the key pressed or XBOARD_PKT_INVALID
  */
 void xboard_comms_send(uint8_t col, uint8_t row){
-  uint8_t key = 0;
-  uint8_t pkt = 0;
+  uint8_t key_pkt = 0;
+  uint8_t mod_pkt = 0;
 
   if(kbd_side_get() == KBDSIDE_RIGHT){
-    pkt |= raised_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
-    pkt |= alt_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
+    mod_pkt |= raised_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
+    mod_pkt |= alt_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
   }
   else {
-    pkt |= lowered_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
-    pkt |= gui_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
+    mod_pkt |= lowered_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
+    mod_pkt |= gui_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
+    mod_pkt |= ctrl_get() ? XBOARD_PKT_CTRL_BIT : 0;
   }
-
-  pkt |= shift_get() ? XBOARD_PKT_SHIFT_BIT : 0;
+  mod_pkt |= shift_get() ? XBOARD_PKT_SHIFT_BIT : 0;
+  mod_pkt &= XBOARD_PKT_DATA_MASK;
+  mod_pkt |= XBOARD_PKT_MOD_HEADER;
 
   if((col == XBOARD_PKT_INVALID) || (row == XBOARD_PKT_INVALID)){
-    key |= XBOARD_PKT_INVALID;
+    key_pkt |= XBOARD_PKT_INVALID;
   }
   else {
-    key = (row * NUM_COLS);
+    key_pkt = (row * NUM_COLS);
     if(row == 3){
-      key += col - 3;
+      key_pkt += col - 3;
     }
     else{
-      key += col;
+      key_pkt += col;
     }
-    key &= XBOARD_PKT_KEY_MASK;
   }
-  pkt |= key;
+  key_pkt &= XBOARD_PKT_DATA_MASK;
+  key_pkt |= XBOARD_PKT_KEY_HEADER;
 
-  uart_putc_raw(uart0, pkt);
+  uart_putc_raw(uart0, mod_pkt);
+  uart_putc_raw(uart0, key_pkt);
   unset_change_queued();
 }
 

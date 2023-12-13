@@ -1,7 +1,7 @@
 /*
  * \file test_xboard_comms.c
  * \author Harper Weigle
- * \date Nov 21 2023
+ * \date Dec 13 2023
  * \brief Testing if keypresses are transmitted properly to the other board
  *        Sends the keys "[cX, rY, sA, mB]" where X is the column of the key pressed
  *        Y is the row of the key pressed, A = T if shift is pressed but F otherwise.
@@ -22,17 +22,57 @@
 #include "usb_descriptors.h"
 #include "xboard_comms.h"
 
-#define NUM_KEYS  4U
+#define NUM_KEYS 4U
+
+#define PKT_QUEUE_SIZE 255U
 
 static uint8_t key_array[NUM_KEYS] = {HID_KEY_P, 0, 0, HID_KEY_ENTER};
 
-static volatile bool pkt_recevied = false;
-static volatile uint8_t pkt = 0;
+static uint8_t pkt_queue[PKT_QUEUE_SIZE] = {0};
+static uint8_t pkt_queue_head = 0;
+static uint8_t pkt_queue_tail = 0;
+
+static bool pkt_queue_empty(){
+  return pkt_queue_head == pkt_queue_tail;
+}
+
+static bool pkt_queue_full(){
+  bool full = false;
+  if((pkt_queue_head == 0) && (pkt_queue_tail == (PKT_QUEUE_SIZE - 1))) {
+    full = true;
+  }
+  if(pkt_queue_tail == (pkt_queue_head - 1)){
+    full = true;
+  }
+  return full;
+}
+
+static bool pkt_queue_push(uint8_t pkt) {
+  bool success = false;
+
+  if(!pkt_queue_full()){
+    pkt_queue[pkt_queue_tail] = pkt;
+    pkt_queue_tail = (pkt_queue_tail + 1) % PKT_QUEUE_SIZE;
+    success = true;
+  }
+
+  return success;
+}
+
+static uint8_t pkt_queue_pop(){
+  uint8_t pkt = 255;
+
+  if(!pkt_queue_empty()){
+    pkt = pkt_queue[pkt_queue_head];
+    pkt_queue_head = (pkt_queue_head + 1) % PKT_QUEUE_SIZE;
+  }
+
+  return pkt;
+}
 
 void test_rx_irq(){
-  while(uart_is_readable(uart0) && (!pkt_recevied)){
-    pkt = uart_getc(uart0);
-    pkt_recevied = true;
+  while(uart_is_readable(uart0)){
+    pkt_queue_push(uart_getc(uart0));
   }
 }
 
@@ -77,6 +117,7 @@ int main(void) {
 
   uint8_t key = 0;
   uint8_t keycode[6] = {0};
+  uint8_t pkt = 0;
   bool msg_rdy = false;
 
   while(true){
@@ -96,13 +137,11 @@ int main(void) {
         }
       }
       else{
-        if(pkt_recevied){
-          if((pkt & XBOARD_PKT_KEY_MASK) != XBOARD_PKT_INVALID){
-            key_array[1] = nibble2HIDKEY(pkt >> 4);
-            key_array[2] = nibble2HIDKEY(pkt);
-            msg_rdy = true;
-          }
-          pkt_recevied = false;
+        if(!pkt_queue_empty()){
+          pkt = pkt_queue_pop();
+          key_array[1] = nibble2HIDKEY(pkt >> 4);
+          key_array[2] = nibble2HIDKEY(pkt);
+          msg_rdy = true;
         }
         if(tud_hid_ready()){
           tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
