@@ -1,7 +1,7 @@
 /*
  * \file keymap.h
  * \author Harper Weigle
- * \date Dec 06 2023
+ * \date Dec 12 2023
  * \brief mapping of keys to functions
  */
 
@@ -46,6 +46,10 @@
 #define MOD_ROW    3
 #define MOD_COL    4
 
+#define MOD_MASK_RIGHT 0x1
+#define MOD_MASK_LEFT  0x2
+
+
 #define KEY_COOLDOWN_MS 30U
 
 #define KBDSIDE_RIGHT 1U
@@ -67,7 +71,7 @@ bool lowered_mod_get();
 void lowered_mod_set(bool pressed);
 bool raised_mod_get();
 void raised_mod_set(bool pressed);
-bool shift_get();
+uint8_t shift_get();
 void shift_set(bool pressed, bool right_side);
 
 #endif //_INC_KEYMAP_H

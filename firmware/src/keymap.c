@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Dec 03 2023
+ * \date Dec 12 2023
  * \brief mapping of keys to functions
  */
 
@@ -27,12 +27,12 @@ static uint8_t col_pins[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYC
 
 static bool keys_initialized = false;
 
-static volatile bool alted = false;
-static volatile bool guied = false;
+static volatile uint8_t alted = 0x0;
+static volatile uint8_t guied = 0x0;
+static volatile uint8_t shifted = 0x0;
+
 static volatile bool raised = false;
 static volatile bool lowered = false;
-static volatile bool r_shifted = false;
-static volatile bool l_shifted = false;
 static volatile bool change_queued = false;
 
 static keymap_t normal_map_r = {{ HID_KEY_Y,    HID_KEY_U,    HID_KEY_I,     HID_KEY_O,      HID_KEY_P,         HID_KEY_BACKSPACE},
@@ -132,7 +132,10 @@ bool alt_get() {
  * \param pressed - whether or not alt is pressed
  */
 void alt_set(bool pressed) {
-  alted = pressed;
+  if(pressed != alted){
+    change_queued = true;
+    alted = pressed;
+  }
 }
 
 /*
@@ -381,10 +384,10 @@ bool gui_get() {
  * \brief setter for the gui press state
  * \param pressed - true if gui is pressed
  */
-void gui_set(bool pressed) {
-  if(guied != pressed){
-    guied = pressed;
+void gui_set(bool pressed){
+  if(pressed != guied){
     change_queued = true;
+    guied = pressed;
   }
 }
 
@@ -428,11 +431,15 @@ void lowered_mod_set(bool pressed){
 }
 
 /*
- * \fn bool shift_get()
+ * \fn uint8_t shift_get()
  * \brief getter for shift
+ * \returns 0x0 if not shifted
+ *          0x1 if right shifted
+ *          0x2 if left shifted
+ *          0x3 if both shifted
  */
-bool shift_get(){
-  return (r_shifted || l_shifted);
+uint8_t shift_get(){
+  return shifted;
 }
 
 /*
@@ -443,14 +450,22 @@ bool shift_get(){
  */
 void shift_set(bool pressed, bool right_side){
   if(right_side){
-    if(r_shifted != pressed) {
-      r_shifted = pressed;
+    if(pressed && ((shifted & MOD_MASK_RIGHT) == 0)) {
+      shifted |= MOD_MASK_RIGHT;
+      change_queued = true;
+    }
+    else if(!pressed && ((shifted & MOD_MASK_RIGHT) == MOD_MASK_RIGHT)) {
+      shifted &= MOD_MASK_LEFT;
       change_queued = true;
     }
   }
   else {
-    if(l_shifted != pressed) {
-      l_shifted = pressed;
+    if(pressed && ((shifted & MOD_MASK_LEFT) == 0)) {
+      shifted |= MOD_MASK_LEFT;
+      change_queued = true;
+    }
+    else if(!pressed && ((shifted & MOD_MASK_LEFT) == MOD_MASK_LEFT)) {
+      shifted &= MOD_MASK_RIGHT;
       change_queued = true;
     }
   }
