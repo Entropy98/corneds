@@ -20,4 +20,3 @@
  * Tests
    * test debug_print test
      * unclear why uart isn't working
- * A sends AS

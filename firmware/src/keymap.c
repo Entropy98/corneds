@@ -246,6 +246,7 @@ void poll_keypresses() {
       gpio_put(col_pins[col], true);
       keys_pressed_by_col[col] = gpio_get_all();
       gpio_put(col_pins[col], false);
+      sleep_us(50);
     }
 
     for(uint8_t col=0; col<NUM_COLS; col++){
