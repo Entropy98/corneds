@@ -11,10 +11,8 @@
 
 # To Do
 ## PCB
- * Pins on left side didn't save
 
 ## Hardware
- * Modify top plate to not cover RPi. It won't fit
 
 ## Firmware
  * Tests
