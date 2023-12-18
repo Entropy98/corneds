@@ -1,7 +1,7 @@
 /*
  * \file keymap.h
  * \author Harper Weigle
- * \date Dec 13 2023
+ * \date Dec 15 2023
  * \brief mapping of keys to functions
  */
 
@@ -59,7 +59,7 @@
 #define KBDSIDE_RIGHT 1U
 #define KBDSIDE_LEFT 2U
 
-typedef uint8_t keymap_t[3][6];
+typedef uint8_t keymap_t[4][6];
 
 bool alt_get();
 void alt_set(bool pressed);
