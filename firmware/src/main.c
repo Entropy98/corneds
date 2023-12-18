@@ -50,14 +50,14 @@ int main(void) {
     tud_task();
 
     if(get_ms_slice() != 0) {
-      poll_keypresses();
-      if(line_state == USB_CONNECTED) {
-        send_hid_report(get_keypress());
-      }
       clear_ms_slice();
     }
 
     if(get_10ms_slice() != 0) {
+      poll_keypresses();
+      if(line_state == USB_CONNECTED) {
+        send_hid_report();
+      }
       clear_10ms_slice();
     }
 

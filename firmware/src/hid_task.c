@@ -14,98 +14,105 @@
 #include "keymap.h"
 #include "usb_descriptors.h"
 
+static bool has_keyboard_key = false;
+
 /*
  * \fn void send_hid_report()
  * \brief sends report for keyboard HID profile. Should be called every 10ms
  * \param keycode_t* keycode to send
  */
-void send_hid_report(uint8_t raw_code) {
+void send_hid_report() {
   uint8_t keycode[6] = {0};
+  uint8_t rawcode = 0;
   uint8_t modifier = mod_get();
 
-  switch (raw_code) {
-    case MACRO_AMPERSAND:
-      keycode[0] = HID_KEY_7;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_CARET:
-      keycode[0] = HID_KEY_6;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_ASTRISK:
-      keycode[0] = HID_KEY_8;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_PARENTHESIS_LEFT:
-      keycode[0] = HID_KEY_9;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_PARENTHESIS_RIGHT:
-      keycode[0] = HID_KEY_0;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_COLON:
-      keycode[0] = HID_KEY_SEMICOLON;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_CURLY_LEFT:
-      keycode[0] = HID_KEY_BRACKET_LEFT;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_CURLY_RIGHT:
-      keycode[0] = HID_KEY_BRACKET_RIGHT;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_PIPE:
-      keycode[0] = HID_KEY_BACKSLASH;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_PLUS:
-      keycode[0] = HID_KEY_EQUAL;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_EXCLAMATION_POINT:
-      keycode[0] = HID_KEY_1;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_AT:
-      keycode[0] = HID_KEY_2;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_HASHTAG:
-      keycode[0] = HID_KEY_3;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_DOLLAR_SIGN:
-      keycode[0] = HID_KEY_4;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_PERCENT:
-      keycode[0] = HID_KEY_5;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_TILDE:
-      keycode[0] = HID_KEY_GRAVE;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_LESS_THAN:
-      keycode[0] = HID_KEY_COMMA;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    case MACRO_GREATER_THAN:
-      keycode[0] = HID_KEY_PERIOD;
-      modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
-      break;
-    default:
-      keycode[0] = raw_code;
-  }
-
   if(tud_hid_ready()) {
-    if(raw_code != HID_KEY_NONE){
-      tud_hid_keyboard_report(REPORT_ID_KEYBOARD, modifier, keycode);
+    rawcode = get_keypress();
+
+    switch (rawcode) {
+      case MACRO_AMPERSAND:
+        keycode[0] = HID_KEY_7;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_CARET:
+        keycode[0] = HID_KEY_6;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_ASTRISK:
+        keycode[0] = HID_KEY_8;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_PARENTHESIS_LEFT:
+        keycode[0] = HID_KEY_9;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_PARENTHESIS_RIGHT:
+        keycode[0] = HID_KEY_0;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_COLON:
+        keycode[0] = HID_KEY_SEMICOLON;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_CURLY_LEFT:
+        keycode[0] = HID_KEY_BRACKET_LEFT;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_CURLY_RIGHT:
+        keycode[0] = HID_KEY_BRACKET_RIGHT;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_PIPE:
+        keycode[0] = HID_KEY_BACKSLASH;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_PLUS:
+        keycode[0] = HID_KEY_EQUAL;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_EXCLAMATION_POINT:
+        keycode[0] = HID_KEY_1;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_AT:
+        keycode[0] = HID_KEY_2;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_HASHTAG:
+        keycode[0] = HID_KEY_3;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_DOLLAR_SIGN:
+        keycode[0] = HID_KEY_4;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_PERCENT:
+        keycode[0] = HID_KEY_5;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_TILDE:
+        keycode[0] = HID_KEY_GRAVE;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_LESS_THAN:
+        keycode[0] = HID_KEY_COMMA;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      case MACRO_GREATER_THAN:
+        keycode[0] = HID_KEY_PERIOD;
+        modifier |= KEYBOARD_MODIFIER_LEFTSHIFT;
+        break;
+      default:
+        keycode[0] = rawcode;
     }
-    else{
+
+    if(rawcode != HID_KEY_NONE){
+      tud_hid_keyboard_report(REPORT_ID_KEYBOARD, modifier, keycode);
+      has_keyboard_key = true;
+    }
+    else if(has_keyboard_key){
       tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
+      has_keyboard_key = false;
     }
   }
 }

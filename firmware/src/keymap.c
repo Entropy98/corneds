@@ -232,12 +232,7 @@ void poll_keypresses() {
 
           // Push Keypress to key buffer
           if(main_kbd){
-            if (kbd_side_get() == KBDSIDE_RIGHT) {
-              push_keypress(col, row, true);
-            }
-            else {
-              push_keypress(col, row, false);
-            }
+            push_keypress(col, row, kbd_side_get() == KBDSIDE_RIGHT);
           }
           // Send Keypress to other board
           else {
