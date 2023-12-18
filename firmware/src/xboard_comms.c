@@ -1,7 +1,7 @@
 /*
  * \file xboard_comms.c
  * \author Harper Weigle
- * \date Dec 13 2023
+ * \date Dec 18 2023
  * \brief interfacing between sides of the keyboard
  */
 
@@ -61,67 +61,59 @@ static void rx_irq(){
 
   while(uart_is_readable(XBOARD_UART_ID)){
     pkt = uart_getc(XBOARD_UART_ID);
-    header = pkt & XBOARD_PKT_HEADER_MASK;
 
-    switch (header) {
+    switch (pkt & XBOARD_PKT_HEADER_MASK) {
       case XBOARD_PKT_KEY_HEADER:
         key = (pkt & XBOARD_PKT_DATA_MASK);
         if(key != XBOARD_PKT_INVALID){
           row = keynum_to_row(key);
           col = keynum_to_col(key, row);
-          push_keypress(col, row, kbd_side_get() == KBDSIDE_LEFT, true);
+          push_keypress(col, row, kbd_side_get() == KBDSIDE_LEFT);
         }
         break;
 
       case XBOARD_PKT_MOD_HEADER:
-        if(pkt & XBOARD_PKT_ALTGUI_BIT){
-          if(kbd_side_get() == KBDSIDE_RIGHT){
-            alt_set(true);
+        if(kbd_side_get() == KBDSIDE_RIGHT){
+          if(pkt & XBOARD_PKT_ALTGUI_BIT){
+            mod_set(KEYBOARD_MODIFIER_RIGHTALT);
           }
           else {
-            gui_set(true);
+            mod_unset(KEYBOARD_MODIFIER_RIGHTALT);
           }
-        }
-        else{
-          if(kbd_side_get() == KBDSIDE_RIGHT){
-            alt_set(false);
+
+          lowered_mod_set((pkt & XBOARD_PKT_MOD_BIT) != 0);
+
+          if(pkt & XBOARD_PKT_SHIFT_BIT){
+            mod_set(KEYBOARD_MODIFIER_RIGHTSHIFT);
           }
           else {
-            gui_set(false);
+            mod_unset(KEYBOARD_MODIFIER_RIGHTSHIFT);
           }
         }
-
-        if(pkt & XBOARD_PKT_MOD_BIT){
-          if(kbd_side_get() == KBDSIDE_RIGHT){
-            lowered_mod_set(true);
-          }
-          else {
-            raised_mod_set(true);
-          }
-        }
-        else{
-          if(kbd_side_get() == KBDSIDE_RIGHT){
-            lowered_mod_set(false);
+        else {
+          if(pkt & XBOARD_PKT_ALTGUI_BIT){
+            mod_set(KEYBOARD_MODIFIER_LEFTGUI);
           }
           else {
-            raised_mod_set(false);
+            mod_unset(KEYBOARD_MODIFIER_LEFTGUI);
+          }
+
+          raised_mod_set((pkt & XBOARD_PKT_MOD_BIT) != 0);
+
+          if(pkt & XBOARD_PKT_SHIFT_BIT){
+            mod_set(KEYBOARD_MODIFIER_LEFTSHIFT);
+          }
+          else {
+            mod_unset(KEYBOARD_MODIFIER_LEFTSHIFT);
+          }
+
+          if(pkt & XBOARD_PKT_CTRL_BIT){
+            mod_set(KEYBOARD_MODIFIER_LEFTCTRL);
+          }
+          else{
+            mod_unset(KEYBOARD_MODIFIER_LEFTCTRL);
           }
         }
-
-        if(pkt & XBOARD_PKT_SHIFT_BIT){
-          shift_set(true, kbd_side_get() == KBDSIDE_LEFT);
-        }
-        else{
-          shift_set(false, kbd_side_get() == KBDSIDE_LEFT);
-        }
-
-        if(pkt & XBOARD_PKT_CTRL_BIT){
-          ctrl_set(true);
-        }
-        else{
-          ctrl_set(false);
-        }
-
         break;
     }
   }
@@ -159,16 +151,10 @@ void xboard_comms_send(uint8_t col, uint8_t row){
   uint8_t key_pkt = 0;
   uint8_t mod_pkt = 0;
 
-  if(kbd_side_get() == KBDSIDE_RIGHT){
-    mod_pkt |= raised_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
-    mod_pkt |= alt_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
-  }
-  else {
-    mod_pkt |= lowered_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
-    mod_pkt |= gui_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
-    mod_pkt |= ctrl_get() ? XBOARD_PKT_CTRL_BIT : 0;
-  }
-  mod_pkt |= shift_get() ? XBOARD_PKT_SHIFT_BIT : 0;
+  mod_pkt |= (raised_mod_get() || lowered_mod_get()) ? XBOARD_PKT_MOD_BIT : 0;
+  mod_pkt |= ((mod_get() & (KEYBOARD_MODIFIER_RIGHTALT | KEYBOARD_MODIFIER_LEFTALT)) != 0) ? XBOARD_PKT_ALTGUI_BIT : 0;
+  mod_pkt |= ((mod_get() & KEYBOARD_MODIFIER_LEFTCTRL) != 0) ? XBOARD_PKT_CTRL_BIT : 0;
+  mod_pkt |= ((mod_get() & (KEYBOARD_MODIFIER_LEFTSHIFT | KEYBOARD_MODIFIER_RIGHTSHIFT)) != 0) ? XBOARD_PKT_SHIFT_BIT : 0;
   mod_pkt &= XBOARD_PKT_DATA_MASK;
   mod_pkt |= XBOARD_PKT_MOD_HEADER;
 
@@ -189,7 +175,6 @@ void xboard_comms_send(uint8_t col, uint8_t row){
 
   uart_putc_raw(uart0, mod_pkt);
   uart_putc_raw(uart0, key_pkt);
-  unset_change_queued();
 }
 
 #endif //_SRC_XBOARD_COMMS_C

@@ -105,7 +105,6 @@ int main(void) {
   led_init();
   board_init();
   tusb_init();
-  init_time_slices();
   init_keys(true);
 
   // Initialize UART but don't initialize irq because unit test one will be used instead

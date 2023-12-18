@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Dec 13 2023
+ * \date Dec 18 2023
  * \brief mapping of keys to functions
  */
 
@@ -27,14 +27,9 @@ static uint8_t col_pins[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYC
 
 static bool keys_initialized = false;
 
-static volatile bool alted = false;
-static volatile bool ctrled = false;
-static volatile bool guied = false;
-static volatile uint8_t shifted = 0x0;
-
+static volatile uint8_t modifier = 0;
 static volatile bool raised = false;
 static volatile bool lowered = false;
-static volatile bool change_queued = false;
 
 static keymap_t normal_map_r = {{ HID_KEY_Y,    HID_KEY_U,    HID_KEY_I,     HID_KEY_O,      HID_KEY_P,         HID_KEY_BACKSPACE},
                                 { HID_KEY_H,    HID_KEY_J,    HID_KEY_K,     HID_KEY_L,      HID_KEY_SEMICOLON, HID_KEY_APOSTROPHE},
@@ -61,7 +56,7 @@ static keymap_t lowered_map_l = {{ HID_KEY_F5,        HID_KEY_F4,         HID_KE
                                  { HID_KEY_PAGE_UP,   HID_KEY_NONE,       HID_KEY_NONE,    HID_KEY_END,  HID_KEY_HOME, HID_KEY_CONTROL_LEFT},
                                  { HID_KEY_PAGE_DOWN, MACRO_GREATER_THAN, MACRO_LESS_THAN, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_SHIFT_LEFT}};
 
-static keymap_t key_cooldowns = {0};
+static keymap_t kbd_state = {0};
 
 /*
  * \fn bool key_buffer_full()
@@ -116,62 +111,6 @@ static uint8_t key_buffer_pop(){
   }
 
   return keycode;
-}
-
-/*
- * \fn bool alt_get()
- * \brief getter for alt press state
- * \returns true if alt is pressed
- */
-bool alt_get() {
-  return alted;
-}
-
-/*
- * \fn void alt_set()
- * \brief setter for alt press state
- * \param pressed - whether or not alt is pressed
- */
-void alt_set(bool pressed) {
-  if(pressed != alted){
-    change_queued = true;
-    alted = pressed;
-  }
-}
-
-/*
- * \fn bool ctrl_get()
- * \brief getter for control press state
- * \returns true if control is pressed
- */
-bool ctrl_get() {
-  return ctrled;
-}
-
-/*
- * \fn void ctrl_set()
- * \brief setter for control press state
- * \param pressed - whether or not control is pressed
- */
-void ctrl_set(bool pressed) {
-  if(pressed != ctrled){
-    change_queued = true;
-    ctrled = pressed;
-  }
-}
-
-/*
- * \fn decrement_key_cooldowns()
- * \brief decrements each of the applicable keys on cooldown
- */
-void decrement_key_cooldowns() {
-  for(uint8_t col=0; col<NUM_COLS; col++){
-    for(uint8_t row=0; row<NUM_ROWS; row++){
-      if(key_cooldowns[row][col] > 0U){
-        key_cooldowns[row][col] -= 1;
-      }
-    }
-  }
 }
 
 /*
@@ -240,6 +179,7 @@ uint8_t kbd_side_get(){
  */
 void poll_keypresses() {
   uint32_t keys_pressed_by_col[NUM_COLS] = {0};
+  uint8_t mod = 0;
 
   if(!key_buffer_full()){
     for(uint8_t col=0; col<NUM_COLS; col++){
@@ -251,16 +191,36 @@ void poll_keypresses() {
 
     for(uint8_t col=0; col<NUM_COLS; col++){
       for(uint8_t row=0; row<NUM_ROWS; row++){
-        if(keys_pressed_by_col[col] & row_masks[row]){
-          if((col == SHIFT_COL) && (row == SHIFT_ROW)){
-            if (kbd_side_get() == KBDSIDE_RIGHT) {
-              shift_set(true, true);
-            }
-            else {
-              shift_set(true, false);
-            }
+        // Update local modifier
+        if((col == SHIFT_COL) && (row == SHIFT_ROW)){
+          if (kbd_side_get() == KBDSIDE_RIGHT) {
+            mod |= KEYBOARD_MODIFIER_RIGHTSHIFT;
           }
-          else if ((col == MOD_COL) && (row == MOD_ROW)) {
+          else {
+            mod |= KEYBOARD_MODIFIER_LEFTSHIFT;
+          }
+        }
+        else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
+          if (kbd_side_get() == KBDSIDE_RIGHT) {
+            mod |= KEYBOARD_MODIFIER_RIGHTALT;
+          }
+          else {
+            mod |= KEYBOARD_MODIFIER_LEFTGUI;
+          }
+        }
+        else if ((col == CTRL_COL) && (row == CTRL_ROW)) {
+          if(kbd_side_get() == KBDSIDE_LEFT) {
+            mod |= KEYBOARD_MODIFIER_LEFTCTRL;
+          }
+        }
+
+        // Key press event
+        if((kbd_state[row][col] == 0) && ((keys_pressed_by_col[col] & row_masks[row]) != 0)) {
+          // Update KBD state
+          kbd_state[row][col] = 1;
+
+          // Set mods
+          if ((col == MOD_COL) && (row == MOD_ROW)) {
             if (kbd_side_get() == KBDSIDE_RIGHT) {
               raised_mod_set(true);
             }
@@ -268,43 +228,29 @@ void poll_keypresses() {
               lowered_mod_set(true);
             }
           }
-          else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
-            if (kbd_side_get() == KBDSIDE_RIGHT) {
-              alt_set(true);
-            }
-            else {
-              gui_set(true);
-            }
-          }
-          else if ((col == CTRL_COL) && (row == CTRL_ROW)) {
-            if(kbd_side_get() == KBDSIDE_LEFT) {
-              ctrl_set(true);
-            }
-          }
+          mod_set(mod);
 
+          // Push Keypress to key buffer
           if(main_kbd){
             if (kbd_side_get() == KBDSIDE_RIGHT) {
-              push_keypress(col, row, true, false);
+              push_keypress(col, row, true);
             }
             else {
-              push_keypress(col, row, false, false);
+              push_keypress(col, row, false);
             }
           }
-          if(key_cooldowns[row][col] == 0U){
+          // Send Keypress to other board
+          else {
             xboard_comms_send(col, row);
-            key_cooldowns[row][col] = KEY_COOLDOWN_MS;
           }
         }
-        else {
-          if((col == SHIFT_COL) && (row == SHIFT_ROW)){
-            if (kbd_side_get() == KBDSIDE_RIGHT) {
-              shift_set(false, true);
-            }
-            else {
-              shift_set(false, false);
-            }
-          }
-          else if ((col == MOD_COL) && (row == MOD_ROW)) {
+        // Key Release Event
+        else if((kbd_state[row][col == 1]) && ((keys_pressed_by_col[col] & row_masks[row]) == 0)) {
+          // Update KBD state
+          kbd_state[row][col] = 0;
+
+          // Unset mods
+          if ((col == MOD_COL) && (row == MOD_ROW)) {
             if (kbd_side_get() == KBDSIDE_RIGHT) {
               raised_mod_set(false);
             }
@@ -312,23 +258,7 @@ void poll_keypresses() {
               lowered_mod_set(false);
             }
           }
-          else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
-            if (kbd_side_get() == KBDSIDE_RIGHT) {
-              alt_set(false);
-            }
-            else {
-              gui_set(false);
-            }
-          }
-          else if ((col == CTRL_COL) && (row == CTRL_ROW)) {
-            if(kbd_side_get() == KBDSIDE_LEFT) {
-              ctrl_set(false);
-            }
-          }
-
-          if(change_queued){
-            xboard_comms_send(XBOARD_PKT_INVALID, XBOARD_PKT_INVALID);
-          }
+          mod_unset(mod);
         }
       }
     }
@@ -341,11 +271,9 @@ void poll_keypresses() {
  * \param uint8_t col - column of the key pressed
  * \param uint8_t row - row of the key pressed
  * \param bool is_right_side - push key from the right side
- * \param bool ignore_cooldown - don't check the cooldown and push the key
  */
-void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_cooldown){
-  if(!key_buffer_full() && (ignore_cooldown || (key_cooldowns[row][col] == 0U))){
-    key_cooldowns[row][col] = KEY_COOLDOWN_MS;
+void push_keypress(uint8_t col, uint8_t row, bool is_right_side) {
+  if(!key_buffer_full()){
     if(row < 3){
       if(raised_mod_get()){
         if(is_right_side){
@@ -405,24 +333,48 @@ uint8_t get_keypress() {
 }
 
 /*
- * \fn bool gui_get()
- * \brief getter for the gui press state
- * \returns true if gui is pressed
+ * \fn bool lowered_mod_get()
+ * \brief getter for raised mod
  */
-bool gui_get() {
-  return guied;
+bool lowered_mod_get(){
+  return lowered;
 }
 
 /*
- * \fn void gui_set()
- * \brief setter for the gui press state
- * \param pressed - true if gui is pressed
+ * \fn void lowered_mod_set()
+ * \brief setter for raised mod
  */
-void gui_set(bool pressed){
-  if(pressed != guied){
-    change_queued = true;
-    guied = pressed;
+void lowered_mod_set(bool pressed){
+  if(lowered != pressed) {
+    lowered = pressed;
   }
+}
+
+/*
+ * \fn uint8_t mod_get()
+ * \brief getter for the standard keyboard modifiers pressed
+ * \returns uint8_t modifiers applied
+ */
+uint8_t mod_get() {
+  return modifier;
+}
+
+/*
+ * \fn void mod_set()
+ * \brief setter for standard keyboard modifiers
+ * \param - mod union of modifiers to set
+ */
+void mod_set(uint8_t mod) {
+  modifier |= modifier;
+}
+
+/*
+ * \fn void mod_unset()
+ * \brief clearer for standard keyboard modifiers
+ * \param mod - union of modifiers to clear
+ */
+void mod_unset(uint8_t mod) {
+  modifier &= (~mod);
 }
 
 /*
@@ -441,77 +393,7 @@ bool raised_mod_get(){
 void raised_mod_set(bool pressed){
   if(raised != pressed){
     raised = pressed;
-    change_queued = true;
   }
-}
-
-/*
- * \fn bool lowered_mod_get()
- * \brief getter for raised mod
- */
-bool lowered_mod_get(){
-  return lowered;
-}
-
-/*
- * \fn void lowered_mod_set()
- * \brief setter for raised mod
- */
-void lowered_mod_set(bool pressed){
-  if(lowered != pressed) {
-    lowered = pressed;
-    change_queued = true;
-  }
-}
-
-/*
- * \fn uint8_t shift_get()
- * \brief getter for shift
- * \returns 0x0 if not shifted
- *          0x1 if right shifted
- *          0x2 if left shifted
- *          0x3 if both shifted
- */
-uint8_t shift_get(){
-  return shifted;
-}
-
-/*
- * \fn void shift_set()
- * \brief setter for shift
- * \param pressed - whether to set or unset shift
- * \param right_side - true if setting right side
- */
-void shift_set(bool pressed, bool right_side){
-  if(right_side){
-    if(pressed && ((shifted & MOD_MASK_RIGHT) == 0)) {
-      shifted |= MOD_MASK_RIGHT;
-      change_queued = true;
-    }
-    else if(!pressed && ((shifted & MOD_MASK_RIGHT) == MOD_MASK_RIGHT)) {
-      shifted &= MOD_MASK_LEFT;
-      change_queued = true;
-    }
-  }
-  else {
-    if(pressed && ((shifted & MOD_MASK_LEFT) == 0)) {
-      shifted |= MOD_MASK_LEFT;
-      change_queued = true;
-    }
-    else if(!pressed && ((shifted & MOD_MASK_LEFT) == MOD_MASK_LEFT)) {
-      shifted &= MOD_MASK_RIGHT;
-      change_queued = true;
-    }
-  }
-}
-
-/*
- * \fn void unset_change_queued()
- * \brief unset the change queued flag after the changed have been sent to the
- *        other board
- */
-void unset_change_queued(){
-  change_queued = false;
 }
 
 #endif //_SRC_KEYMAP_C

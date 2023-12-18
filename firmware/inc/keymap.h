@@ -1,7 +1,7 @@
 /*
  * \file keymap.h
  * \author Harper Weigle
- * \date Dec 15 2023
+ * \date Dec 18 2023
  * \brief mapping of keys to functions
  */
 
@@ -53,32 +53,23 @@
 #define MOD_MASK_RIGHT 0x1
 #define MOD_MASK_LEFT  0x2
 
-
-#define KEY_COOLDOWN_MS 30U
-
 #define KBDSIDE_RIGHT 1U
 #define KBDSIDE_LEFT 2U
 
 typedef uint8_t keymap_t[4][6];
 
-bool alt_get();
-void alt_set(bool pressed);
-bool ctrl_get();
-void ctrl_set(bool pressed);
-void decrement_key_cooldowns();
 void init_keys(bool is_main);
 uint8_t kbd_side_get();
 void poll_keypresses();
-void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_cooldown);
+void push_keypress(uint8_t col, uint8_t row, bool is_right_side);
 uint8_t get_keypress();
-bool gui_get();
-void gui_set(bool pressed);
 bool lowered_mod_get();
 void lowered_mod_set(bool pressed);
+uint8_t mod_get();
+void mod_set(uint8_t mod);
+void mod_unset(uint8_t mod);
 bool raised_mod_get();
 void raised_mod_set(bool pressed);
-uint8_t shift_get();
-void shift_set(bool pressed, bool right_side);
 void unset_change_queued();
 
 #endif //_INC_KEYMAP_H

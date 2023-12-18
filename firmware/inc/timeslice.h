@@ -1,7 +1,7 @@
 /*
  * \file time.h
  * \author Harper Weigle
- * \date Apr 18 2023
+ * \date Dec 18 2023
  * \brief timing functions to support backbone of time slice architecture
  */
 
@@ -10,7 +10,6 @@
 
 #include "pico/stdlib.h"
 
-void init_time_slices();
 void update_time_slices();
 
 void clear_ms_slice();

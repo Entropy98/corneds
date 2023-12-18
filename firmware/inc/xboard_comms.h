@@ -14,8 +14,8 @@
  * Cross Board Packet Structure
  *   | Bits | Content |
  *   |------|---------|
- *   | 7-8  | Header  |
- *   | 0-6  |  Data   |
+ *   | 6-7  | Header  |
+ *   | 0-5  |  Data   |
  */
 
 #define XBOARD_PKT_KEY_HEADER 0x00

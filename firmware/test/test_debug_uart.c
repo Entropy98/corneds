@@ -17,7 +17,6 @@ int main(void) {
   board_init();
 
   led_init();
-  init_time_slices();
   debug_uart_init();
 
   while(true){

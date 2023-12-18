@@ -27,7 +27,6 @@ int main(void) {
   led_init();
   board_init();
   tusb_init();
-  init_time_slices();
 
   uint8_t key = 0;
   uint8_t keycode[6] = {0};
