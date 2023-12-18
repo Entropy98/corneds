@@ -61,7 +61,7 @@ static keymap_t lowered_map_l = {{ HID_KEY_F5,        HID_KEY_F4,         HID_KE
                                  { HID_KEY_PAGE_UP,   HID_KEY_NONE,       HID_KEY_NONE,    HID_KEY_END,  HID_KEY_HOME, HID_KEY_CONTROL_LEFT},
                                  { HID_KEY_PAGE_DOWN, MACRO_GREATER_THAN, MACRO_LESS_THAN, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_SHIFT_LEFT}};
 
-static keymap_t key_cooldowns = {0};
+// static keymap_t key_cooldowns = {0};
 
 /*
  * \fn bool key_buffer_full()
@@ -167,9 +167,9 @@ void ctrl_set(bool pressed) {
 void decrement_key_cooldowns() {
   for(uint8_t col=0; col<NUM_COLS; col++){
     for(uint8_t row=0; row<NUM_ROWS; row++){
-      if(key_cooldowns[row][col] > 0U){
-        key_cooldowns[row][col] -= 1;
-      }
+      // if(key_cooldowns[row][col] > 0U){
+      //   key_cooldowns[row][col] -= 1;
+      // }
     }
   }
 }
@@ -290,10 +290,12 @@ void poll_keypresses() {
               push_keypress(col, row, false, false);
             }
           }
-          if(key_cooldowns[row][col] == 0U){
+          else {
             xboard_comms_send(col, row);
-            key_cooldowns[row][col] = KEY_COOLDOWN_MS;
           }
+          // if(key_cooldowns[row][col] == 0U){
+          //   key_cooldowns[row][col] = KEY_COOLDOWN_MS;
+          // }
         }
         else {
           if((col == SHIFT_COL) && (row == SHIFT_ROW)){
@@ -344,8 +346,9 @@ void poll_keypresses() {
  * \param bool ignore_cooldown - don't check the cooldown and push the key
  */
 void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_cooldown){
-  if(!key_buffer_full() && (ignore_cooldown || (key_cooldowns[row][col] == 0U))){
-    key_cooldowns[row][col] = KEY_COOLDOWN_MS;
+  // if(!key_buffer_full() && (ignore_cooldown || (key_cooldowns[row][col] == 0U))){
+  if(!key_buffer_full()) {
+    // key_cooldowns[row][col] = KEY_COOLDOWN_MS;
     if(row < 3){
       if(raised_mod_get()){
         if(is_right_side){
