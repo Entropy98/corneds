@@ -16,6 +16,8 @@
 
 #define KEYCODE_LEN 6
 
+static bool has_keyreport = false;
+
 /*
  * \fn void send_hid_report()
  * \brief sends report for keyboard HID profile. Should be called every 10ms
@@ -125,9 +127,11 @@ void send_hid_report() {
 
     if(keycode[0] != HID_KEY_NONE){
       tud_hid_keyboard_report(REPORT_ID_KEYBOARD, modifier, keycode);
+      has_keyreport = true;
     }
     else{
       tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
+      has_keyreport = false;
     }
   }
 }

@@ -1,7 +1,7 @@
 /*
  * \file time.c
  * \author Harper Weigle
- * \date Apr 18 2023
+ * \date Dec 18 2023
  * \brief timing functions to support backbone of time slice architecture
  */
 
@@ -12,13 +12,6 @@
 
 #include "timeslice.h"
 
-// rp2040 defaults to a 6MHz ring oscillator clock
-// Values found through experimentation
-#define TICKS_PER_MS      837
-#define TICKS_PER_10MS    8560
-#define TICKS_PER_100MS   85608
-#define TICKS_PER_S       822435
-
 #define MS_SLICE      0x01
 #define MS_10_SLICE   0x02
 #define MS_100_SLICE  0x04
@@ -28,62 +21,30 @@
 #define MS_10_SLICE_MASK   0xFD
 #define MS_100_SLICE_MASK  0xFB
 #define S_SLICE_MASK       0xF7
-typedef struct slice_timers {
-  uint32_t  s_timer;
-  uint32_t  ms_100_timer;
-  uint16_t  ms_10_timer;
-  uint16_t  ms_timer;
-}slice_timers_t;
 
-static slice_timers_t timers;
 static uint8_t time_slices = 0;
-
-/*
- * \fn void init_time_slices()
- * \brief initializes the time slices.
- */
-void init_time_slices() {
-  timers.ms_timer = 0;
-  timers.ms_10_timer = 0;
-  timers.ms_100_timer = 0;
-  timers.s_timer = 0;
-}
 
 /*
  * \fn void update_time_slices()
  * \brief updates the time slices. Meant to be called every tick
  */
 void update_time_slices() {
-  if(timers.ms_timer >= TICKS_PER_MS) {
+  uint32_t time = time_us_32();
+
+  if(time % 1000U == 0U){
     time_slices |= MS_SLICE;
-    timers.ms_timer = 0;
-  }
-  else {
-    timers.ms_timer++;
   }
 
-  if(timers.ms_10_timer >= TICKS_PER_10MS) {
+  if(time % 10000U == 0U){
     time_slices |= MS_10_SLICE;
-    timers.ms_10_timer = 0;
-  }
-  else {
-    timers.ms_10_timer++;
   }
 
-  if(timers.ms_100_timer >= TICKS_PER_100MS) {
+  if(time % 100000U == 0U){
     time_slices |= MS_100_SLICE;
-    timers.ms_100_timer = 0;
-  }
-  else {
-    timers.ms_100_timer++;
   }
 
-  if(timers.s_timer >= TICKS_PER_S) {
+  if(time % 1000000U == 0U){
     time_slices |= S_SLICE;
-    timers.s_timer = 0;
-  }
-  else {
-    timers.s_timer++;
   }
 }
 

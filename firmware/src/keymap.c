@@ -61,8 +61,6 @@ static keymap_t lowered_map_l = {{ HID_KEY_F5,        HID_KEY_F4,         HID_KE
                                  { HID_KEY_PAGE_UP,   HID_KEY_NONE,       HID_KEY_NONE,    HID_KEY_END,  HID_KEY_HOME, HID_KEY_CONTROL_LEFT},
                                  { HID_KEY_PAGE_DOWN, MACRO_GREATER_THAN, MACRO_LESS_THAN, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_SHIFT_LEFT}};
 
-// static keymap_t key_cooldowns = {0};
-
 /*
  * \fn bool key_buffer_full()
  * \brief checks if the key buffer can be pushed to
@@ -157,20 +155,6 @@ void ctrl_set(bool pressed) {
   if(pressed != ctrled){
     change_queued = true;
     ctrled = pressed;
-  }
-}
-
-/*
- * \fn decrement_key_cooldowns()
- * \brief decrements each of the applicable keys on cooldown
- */
-void decrement_key_cooldowns() {
-  for(uint8_t col=0; col<NUM_COLS; col++){
-    for(uint8_t row=0; row<NUM_ROWS; row++){
-      // if(key_cooldowns[row][col] > 0U){
-      //   key_cooldowns[row][col] -= 1;
-      // }
-    }
   }
 }
 
@@ -276,7 +260,7 @@ void poll_keypresses() {
               gui_set(true);
             }
           }
-          else if ((col == CTRL_COL) && (row == CTRL_ROW)) {
+          else if ((col == CTRL_COL) && (row == CTRL_ROW) && (!raised_mod_get())) {
             if(kbd_side_get() == KBDSIDE_LEFT) {
               ctrl_set(true);
             }
@@ -293,9 +277,6 @@ void poll_keypresses() {
           else {
             xboard_comms_send(col, row);
           }
-          // if(key_cooldowns[row][col] == 0U){
-          //   key_cooldowns[row][col] = KEY_COOLDOWN_MS;
-          // }
         }
         else {
           if((col == SHIFT_COL) && (row == SHIFT_ROW)){
@@ -346,9 +327,7 @@ void poll_keypresses() {
  * \param bool ignore_cooldown - don't check the cooldown and push the key
  */
 void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_cooldown){
-  // if(!key_buffer_full() && (ignore_cooldown || (key_cooldowns[row][col] == 0U))){
   if(!key_buffer_full()) {
-    // key_cooldowns[row][col] = KEY_COOLDOWN_MS;
     if(row < 3){
       if(raised_mod_get()){
         if(is_right_side){
