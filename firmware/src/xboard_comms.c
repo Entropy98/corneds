@@ -93,18 +93,18 @@ static void rx_irq(){
 
         if(pkt & XBOARD_PKT_MOD_BIT){
           if(kbd_side_get() == KBDSIDE_RIGHT){
-            lowered_mod_set(true);
+            raised_mod_set(true);
           }
           else {
-            raised_mod_set(true);
+            lowered_mod_set(true);
           }
         }
         else{
           if(kbd_side_get() == KBDSIDE_RIGHT){
-            lowered_mod_set(false);
+            raised_mod_set(false);
           }
           else {
-            raised_mod_set(false);
+            lowered_mod_set(false);
           }
         }
 
@@ -160,11 +160,11 @@ void xboard_comms_send(uint8_t col, uint8_t row){
   uint8_t mod_pkt = 0;
 
   if(kbd_side_get() == KBDSIDE_RIGHT){
-    mod_pkt |= raised_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
+    mod_pkt |= lowered_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
     mod_pkt |= alt_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
   }
   else {
-    mod_pkt |= lowered_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
+    mod_pkt |= raised_mod_get() ? XBOARD_PKT_MOD_BIT : 0;
     mod_pkt |= gui_get() ? XBOARD_PKT_ALTGUI_BIT : 0;
     mod_pkt |= ctrl_get() ? XBOARD_PKT_CTRL_BIT : 0;
   }

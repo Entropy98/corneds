@@ -268,10 +268,10 @@ void poll_keypresses() {
           }
           else if ((col == MOD_COL) && (row == MOD_ROW)) {
             if (kbd_side_get() == KBDSIDE_RIGHT) {
-              raised_mod_set(true);
+              lowered_mod_set(true);
             }
             else {
-              lowered_mod_set(true);
+              raised_mod_set(true);
             }
           }
           else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
@@ -311,10 +311,10 @@ void poll_keypresses() {
           }
           else if ((col == MOD_COL) && (row == MOD_ROW)) {
             if (kbd_side_get() == KBDSIDE_RIGHT) {
-              raised_mod_set(false);
+              lowered_mod_set(false);
             }
             else {
-              lowered_mod_set(false);
+              raised_mod_set(false);
             }
           }
           else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
