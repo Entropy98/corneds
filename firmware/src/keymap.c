@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Dec 13 2023
+ * \date Dec 20 2023
  * \brief mapping of keys to functions
  */
 
@@ -19,8 +19,8 @@ static bool main_kbd = true;
 static uint8_t kbd_side = 0U;
 
 static volatile uint8_t key_buffer[KEY_BUFFER_SIZE];
-static uint8_t key_buffer_head = 0;
-static uint8_t key_buffer_foot = 0;
+static uint8_t key_buffer_head = 0U;
+static uint8_t key_buffer_foot = 0U;
 
 static uint8_t row_masks[NUM_ROWS] = {ROW0_MASK, ROW1_MASK, ROW2_MASK, ROW3_MASK};
 static uint8_t col_pins[NUM_COLS] = {KEYCOL0_PIN, KEYCOL1_PIN, KEYCOL2_PIN, KEYCOL3_PIN, KEYCOL4_PIN, KEYCOL5_PIN};
@@ -60,6 +60,36 @@ static keymap_t raised_map_l = {{ MACRO_PERCENT,    MACRO_DOLLAR_SIGN,    MACRO_
 static keymap_t lowered_map_l = {{ HID_KEY_F5,        HID_KEY_F4,         HID_KEY_F3,      HID_KEY_F2,   HID_KEY_F1,   HID_KEY_ESCAPE},
                                  { HID_KEY_PAGE_UP,   HID_KEY_NONE,       HID_KEY_NONE,    HID_KEY_END,  HID_KEY_HOME, HID_KEY_CONTROL_LEFT},
                                  { HID_KEY_PAGE_DOWN, MACRO_GREATER_THAN, MACRO_LESS_THAN, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_SHIFT_LEFT}};
+/*
+ * \fn bool key_buffer_contains()
+ * \brief checks if the key buffer contains an item
+ * \param uint8_t key to search for
+ * \returns true if the key exists in the buffer
+ */
+static bool key_buffer_contains(uint8_t key) {
+  uint8_t i = key_buffer_head;
+  bool is_contained = false;
+
+  while(i != key_buffer_foot){
+    if(key_buffer[i] == key) {
+      is_contained = true;
+      break;
+    }
+    i++;
+    if(i == KEY_BUFFER_SIZE) i = 0;
+  }
+  return is_contained;
+}
+
+/*
+ * \fn bool key_buffer_empty()
+ * \brief checks if the key buffer can be popped from
+ * \returns bool true if key buffer is empty
+ */
+static bool key_buffer_empty(){
+  return (key_buffer_foot == key_buffer_head);
+}
+
 
 /*
  * \fn bool key_buffer_full()
@@ -72,24 +102,16 @@ static bool key_buffer_full(){
 }
 
 /*
- * \fn bool key_buffer_empty()
- * \brief checks if the key buffer can be popped from
- * \returns bool true if key buffer is empty
- */
-static bool key_buffer_empty(){
-  return (key_buffer_foot == key_buffer_head);
-}
-
-/*
  * \fn uint8_t key_buffer_push(uint8_t key)
- * \brief local helper function for pushing to key buffer
+ * \brief local helper function for pushing to key buffer.
+ *        Will fail if the key is already in the buffer
  * \param uint8_t key - key to push to key buffer
  * \returns 0 if successful
  */
 static uint8_t key_buffer_push(uint8_t key){
   uint8_t retval = 1;
 
-  if(!key_buffer_full()) {
+  if(!key_buffer_full() && !key_buffer_contains(key)) {
     key_buffer[key_buffer_foot] = key;
     key_buffer_foot++;
     if(key_buffer_foot == KEY_BUFFER_SIZE) key_buffer_foot = 0;
@@ -268,10 +290,10 @@ void poll_keypresses() {
 
           if(main_kbd){
             if (kbd_side_get() == KBDSIDE_RIGHT) {
-              push_keypress(col, row, true, false);
+              push_keypress(col, row, true);
             }
             else {
-              push_keypress(col, row, false, false);
+              push_keypress(col, row, false);
             }
           }
           else {
@@ -324,9 +346,8 @@ void poll_keypresses() {
  * \param uint8_t col - column of the key pressed
  * \param uint8_t row - row of the key pressed
  * \param bool is_right_side - push key from the right side
- * \param bool ignore_cooldown - don't check the cooldown and push the key
  */
-void push_keypress(uint8_t col, uint8_t row, bool is_right_side, bool ignore_cooldown){
+void push_keypress(uint8_t col, uint8_t row, bool is_right_side){
   if(!key_buffer_full()) {
     if(row < 3){
       if(raised_mod_get()){

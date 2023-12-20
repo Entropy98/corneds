@@ -1,7 +1,7 @@
 /*
  * \file xboard_comms.c
  * \author Harper Weigle
- * \date Dec 13 2023
+ * \date Dec 20 2023
  * \brief interfacing between sides of the keyboard
  */
 
@@ -69,7 +69,7 @@ static void rx_irq(){
         if(key != XBOARD_PKT_INVALID){
           row = keynum_to_row(key);
           col = keynum_to_col(key, row);
-          push_keypress(col, row, kbd_side_get() == KBDSIDE_LEFT, true);
+          push_keypress(col, row, kbd_side_get() == KBDSIDE_LEFT);
         }
         break;
 
