@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Dec 20 2023
+ * \date Dec 21 2023
  * \brief mapping of keys to functions
  */
 
@@ -259,7 +259,10 @@ void poll_keypresses() {
       for(uint8_t row=0; row<NUM_ROWS; row++){
         if(keys_pressed_by_col[col] & row_masks[row]){
           if((col == SHIFT_COL) && (row == SHIFT_ROW)){
-            if (kbd_side_get() == KBDSIDE_RIGHT) {
+            if ((kbd_side_get() == KBDSIDE_RIGHT)
+                && (!raised_mod_get())
+                && (!lowered_mod_get())
+            ) {
               shift_set(true, true);
             }
             else {
