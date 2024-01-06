@@ -11,16 +11,16 @@ add_executable(${PROJECT_NAME}
 )
 
 # Tests
-add_executable(${PROJECT_NAME}_test_debug_uart
+add_executable(test_debug_uart
   test/test_debug_uart.c
 )
-add_executable(${PROJECT_NAME}_test_keypress
+add_executable(test_keypress
   test/test_keypress.c
 )
-add_executable(${PROJECT_NAME}_test_print
+add_executable(test_print
   test/test_print.c
 )
-add_executable(${PROJECT_NAME}_test_xboard_comms
+add_executable(test_xboard_comms
   test/test_xboard_comms.c
 )
 
@@ -31,19 +31,19 @@ target_compile_options(${PROJECT_NAME} PUBLIC
 )
 
 # Tests
-target_compile_options(${PROJECT_NAME}_test_debug_uart PUBLIC
+target_compile_options(test_debug_uart PUBLIC
   -g
   -O0
 )
-target_compile_options(${PROJECT_NAME}_test_keypress PUBLIC
+target_compile_options(test_keypress PUBLIC
   -g
   -O0
 )
-target_compile_options(${PROJECT_NAME}_test_print PUBLIC
+target_compile_options(test_print PUBLIC
   -g
   -O0
 )
-target_compile_options(${PROJECT_NAME}_test_xboard_comms PUBLIC
+target_compile_options(test_xboard_comms PUBLIC
   -g
   -O0
 )
@@ -60,7 +60,7 @@ target_sources(${PROJECT_NAME} PUBLIC
 )
 
 # Tests
-target_sources(${PROJECT_NAME}_test_debug_uart PUBLIC
+target_sources(test_debug_uart PUBLIC
   src/debug_uart.c
   src/hid_task.c
   src/led_utils.c
@@ -68,7 +68,7 @@ target_sources(${PROJECT_NAME}_test_debug_uart PUBLIC
   src/usb_descriptors.c
   src/usb_detect.c
 )
-target_sources(${PROJECT_NAME}_test_keypress PUBLIC
+target_sources(test_keypress PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
@@ -76,7 +76,7 @@ target_sources(${PROJECT_NAME}_test_keypress PUBLIC
   src/usb_descriptors.c
   src/usb_detect.c
 )
-target_sources(${PROJECT_NAME}_test_print PUBLIC
+target_sources(test_print PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
@@ -85,7 +85,7 @@ target_sources(${PROJECT_NAME}_test_print PUBLIC
   src/usb_detect.c
   src/xboard_comms.c
 )
-target_sources(${PROJECT_NAME}_test_xboard_comms PUBLIC
+target_sources(test_xboard_comms PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
@@ -99,15 +99,15 @@ target_sources(${PROJECT_NAME}_test_xboard_comms PUBLIC
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
 
 # Tests
-target_include_directories(${PROJECT_NAME}_test_debug_uart PUBLIC inc)
-target_include_directories(${PROJECT_NAME}_test_keypress PUBLIC inc)
-target_include_directories(${PROJECT_NAME}_test_print PUBLIC inc)
-target_include_directories(${PROJECT_NAME}_test_xboard_comms PUBLIC inc)
+target_include_directories(test_debug_uart PUBLIC inc)
+target_include_directories(test_keypress PUBLIC inc)
+target_include_directories(test_print PUBLIC inc)
+target_include_directories(test_xboard_comms PUBLIC inc)
 
 target_link_libraries(${PROJECT_NAME} pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
 
 # Tests
-target_link_libraries(${PROJECT_NAME}_test_debug_uart tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
-target_link_libraries(${PROJECT_NAME}_test_keypress tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
-target_link_libraries(${PROJECT_NAME}_test_print pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
-target_link_libraries(${PROJECT_NAME}_test_xboard_comms tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
+target_link_libraries(test_debug_uart tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
+target_link_libraries(test_keypress tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
+target_link_libraries(test_print pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
+target_link_libraries(test_xboard_comms tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
