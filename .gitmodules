@@ -1,3 +1,9 @@
 [submodule "firmware/pico-sdk"]
 	path = firmware/pico-sdk
 	url = git@github.com:raspberrypi/pico-sdk.git
+[submodule "corneds_hw"]
+	path = hardware
+	url = git@github.com:Entropy98/corneds_hw.git
+[submodule "corneds_pcb"]
+	path = pcb
+	url = git@github.com:Entropy98/corneds_pcb.git
