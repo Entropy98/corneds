@@ -12,7 +12,6 @@
 #include "pico/stdlib.h"
 #include "tusb.h"
 
-#include "timeslice.h"
 #include "led_utils.h"
 #include "usb_descriptors.h"
 
@@ -32,22 +31,9 @@ int main(void) {
   uint8_t keycode[6] = {0};
 
   while(true){
-    update_time_slices();
     tud_task();
 
-    if(get_ms_slice() != 0) {
-      clear_ms_slice();
-    }
 
-    if(get_10ms_slice() != 0) {
-      clear_10ms_slice();
-    }
-
-    if(get_100ms_slice() != 0) {
-      clear_100ms_slice();
-    }
-
-    if(get_s_slice() != 0) {
       if(tud_hid_ready()) {
         keycode[0] = key_array[key];
         tud_hid_keyboard_report(REPORT_ID_KEYBOARD, modifier_array[key], keycode);
@@ -55,7 +41,5 @@ int main(void) {
         key = key % 12;
         led_toggle();
       }
-      clear_s_slice();
-    }
   }
 }

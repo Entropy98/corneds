@@ -1,7 +1,7 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Dec 18 2023
+ * \date Jan 08 2024
  * \brief Firmware for corneDS split 40% keyboard
  */
 
@@ -13,7 +13,7 @@
 #include "hid_task.h"
 #include "keymap.h"
 #include "led_utils.h"
-#include "timeslice.h"
+#include "timing_arch.h"
 #include "usb_descriptors.h"
 #include "usb_detect.h"
 #include "xboard_comms.h"
@@ -24,6 +24,7 @@ int main(void) {
   led_init();
   tusb_init();
   debug_uart_init();
+  timing_arch_init();
 
   uint8_t line_state = usb_detected();
 
@@ -46,35 +47,7 @@ int main(void) {
   }
 
   while(1) {
-    update_time_slices();
     tud_task();
-
-    if(get_ms_slice() != 0) {
-      poll_keypresses();
-      clear_ms_slice();
-    }
-
-    if(get_10ms_slice() != 0) {
-      if(line_state == USB_CONNECTED) {
-        send_hid_report();
-      }
-      clear_10ms_slice();
-    }
-
-    if(get_100ms_slice() != 0) {
-      if(kbd_side_get() == KBDSIDE_RIGHT){
-        led_toggle();
-      }
-      clear_100ms_slice();
-    }
-
-    if(get_s_slice() != 0) {
-      if(kbd_side_get() == KBDSIDE_LEFT){
-        led_toggle();
-      }
-      clear_s_slice();
-    }
-
   }
 
   return 0;

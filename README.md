@@ -18,3 +18,5 @@
  * Tests
    * test debug_print test
      * unclear why uart isn't working
+ * Timing Architecture
+   * Writing interrupt based timing architecture

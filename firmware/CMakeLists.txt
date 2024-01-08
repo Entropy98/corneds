@@ -53,7 +53,7 @@ target_sources(${PROJECT_NAME} PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
-  src/timeslice.c
+  src/timing_arch.c
   src/usb_descriptors.c
   src/usb_detect.c
   src/xboard_comms.c
@@ -64,7 +64,7 @@ target_sources(test_debug_uart PUBLIC
   src/debug_uart.c
   src/hid_task.c
   src/led_utils.c
-  src/timeslice.c
+  src/timing_arch.c
   src/usb_descriptors.c
   src/usb_detect.c
 )
@@ -72,7 +72,7 @@ target_sources(test_keypress PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
-  src/timeslice.c
+  src/timing_arch.c
   src/usb_descriptors.c
   src/usb_detect.c
 )
@@ -80,7 +80,7 @@ target_sources(test_print PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
-  src/timeslice.c
+  src/timing_arch.c
   src/usb_descriptors.c
   src/usb_detect.c
   src/xboard_comms.c
@@ -89,7 +89,7 @@ target_sources(test_xboard_comms PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
-  src/timeslice.c
+  src/timing_arch.c
   src/usb_descriptors.c
   src/usb_detect.c
   src/xboard_comms.c

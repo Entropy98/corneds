@@ -17,7 +17,6 @@
 
 #include "keymap.h"
 #include "pinmap.h"
-#include "timeslice.h"
 #include "led_utils.h"
 #include "usb_descriptors.h"
 #include "xboard_comms.h"
@@ -120,10 +119,8 @@ int main(void) {
   bool msg_rdy = false;
 
   while(true){
-    update_time_slices();
     tud_task();
 
-    if(get_ms_slice() != 0) {
       if(msg_rdy){
         if(tud_hid_ready()){
           keycode[0] = key_array[key];
@@ -146,21 +143,7 @@ int main(void) {
           tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
         }
       }
-      clear_ms_slice();
     }
 
-    if(get_10ms_slice() != 0) {
-      clear_10ms_slice();
-    }
-
-    if(get_100ms_slice() != 0) {
-      clear_100ms_slice();
-    }
-
-    if(get_s_slice() != 0) {
-      led_toggle();
-      clear_s_slice();
-    }
-  }
 }
 
