@@ -1,7 +1,7 @@
 /*
  * \file timing_arch.c
  * \author Harper Weigle
- * \date Jan 08 2024
+ * \date Jan 10 2024
  * \brief Functions for handling the timing of events
  */
 
@@ -9,10 +9,10 @@
 #define _INC_TIMING_ARCH_H
 
 #include <bsp/board.h>
-#include <pico/stdlib.h>
 #include <pico/sem.h>
 
 #include "results.h"
+#include "timing_arch.h"
 
 // Semaphores
 static semaphore_t ms5_fired;
@@ -26,7 +26,7 @@ volatile static alarm_id_t ms100_alarm_id;
 volatile static alarm_id_t s1_alarm_id;
 
 /*
- * \fn alarm_callback_t alarm_5ms_cback()
+ * \fn bool alarm_5ms_cback()
  * \brief Executes every 5ms and resets semaphore for that timing block
  * \param alarm_id_t id - id of the alarm
  * \param void* user_data - UNUSED
@@ -38,37 +38,40 @@ static bool alarm_5ms_cback(struct repeating_timer *t) {
 }
 
 /*
- * \fn alarm_callback_t alarm_10ms_cback()
+ * \fn bool alarm_10ms_cback()
  * \brief Executes every 10ms and resets semaphore for that timing block
  * \param alarm_id_t id - id of the alarm
  * \param void* user_data - UNUSED
  * \returns true if repeating should continue
  */
-static bool alarm_10ms_cback(alarm_id_t id, void* user_data) {
+static bool alarm_10ms_cback(struct repeating_timer *t) {
   sem_release(&ms10_fired);
+  return true;
 }
 
 /*
- * \fn alarm_callback_t alarm_100ms_cback()
+ * \fn bool alarm_100ms_cback()
  * \brief Executes every 100ms and resets semaphore for that timing block
  * \param alarm_id_t id - id of the alarm
  * \param void* user_data - UNUSED
  * \returns true if repeating should continue
  */
-static bool alarm_100ms_cback(alarm_id_t id, void* user_data) {
+static bool alarm_100ms_cback(struct repeating_timer *t) {
   sem_release(&ms100_fired);
+  return true;
 }
 
 /*
- * \fn alarm_callback_t alarm_1s_cback()
+ * \fn bool alarm_1s_cback()
  * \brief Executes every 1s and resets semaphore for that timing block
  * \param alarm_id_t id - id of the alarm
  * \param void* user_data - UNUSED
  * \returns RESULT_SUCCESS on successful execution
  * \returns true if repeating should continue
  */
-static bool alarm_1s_cback(alarm_id_t id, void* user_data) {
+static bool alarm_1s_cback(struct repeating_timer *t) {
   sem_release(&s1_fired);
+  return true;
 }
 
 /*
@@ -84,21 +87,49 @@ void timing_arch_init() {
   sem_init(&s1_alarm_id, 0, 1);
 
   struct repeating_timer timer;
+  s1_alarm_id = add_repeating_timer_ms(1000U, alarm_1s_cback, NULL, &timer);
+  sleep_ms(1U);
+  ms100_alarm_id = add_repeating_timer_ms(100U, alarm_100ms_cback, NULL, &timer);
+  sleep_ms(1U);
+  ms10_alarm_id = add_repeating_timer_ms(10U, alarm_10ms_cback, NULL, &timer);
+  sleep_ms(1U);
   ms5_alarm_id = add_repeating_timer_ms(5U, alarm_5ms_cback, NULL, &timer);
-  ms10_alarm_id = add_repeating_timer_ms(10U, ms10_fired, NULL, true);
-  ms100_alarm_id = add_repeating_timer_ms(100U, ms100_fired, NULL, true);
-  s1_alarm_id = add_repeating_timer_ms(1000U, s1_fired, NULL, true);
 }
 
 /*
- * \fn timing_arch_task_add()
- * \brief Adds a task to the timing architecture
- * \param void task - task to add
- * \param uint64_t exec_freq_ms - how long to wait before executing the task again
- * \returns RESULT_SUCCESS on successful execution
+ * \fn bool ms5_loop_check()
+ * \brief checks if the 5ms loop can execute
+ * \returns true if loop should execute
  */
-result_t timing_arch_task_add(void task(), uint64_t exec_freq_ms) {
-  result_t result = RESULT_UNKNOWN;
+bool ms5_loop_check() {
+  return sem_try_acquire(&ms5_fired);
+}
+
+/*
+ * \fn bool ms10_loop_check()
+ * \brief checks if the 10ms loop can execute
+ * \returns true if loop should execute
+ */
+bool ms10_loop_check() {
+  return sem_try_acquire(&ms10_fired);
+}
+
+/*
+ * \fn bool ms100_loop_check()
+ * \brief checks if the 100ms loop can execute
+ * \returns true if loop should execute
+ */
+bool ms100_loop_check() {
+  return sem_try_acquire(&ms100_fired);
+}
+
+/*
+ * \fn bool s1_loop_check()
+ * \brief checks if the 1s loop can execute
+ * \returns true if loop should execute
+ */
+bool s1_loop_check() {
+  return sem_try_acquire(&s1_fired);
 }
 
 #endif //_INC_TIMING_ARCH_H

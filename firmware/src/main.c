@@ -48,6 +48,27 @@ int main(void) {
 
   while(1) {
     tud_task();
+    if(ms5_loop_check()) {
+      poll_keypresses();
+    }
+
+    if(ms10_loop_check()) {
+      if(line_state == USB_CONNECTED) {
+        send_hid_report();
+      }
+    }
+
+    if(ms100_loop_check()) {
+      if(line_state == USB_CONNECTED) {
+        led_toggle();
+      }
+    }
+
+    if(s1_loop_check()) {
+      if(line_state == USB_CONNECTED) {
+        led_toggle();
+      }
+    }
   }
 
   return 0;
