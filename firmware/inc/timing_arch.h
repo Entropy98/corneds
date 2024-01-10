@@ -1,7 +1,7 @@
 /*
  * \file timing_arch.h
  * \author Harper Weigle
- * \date Jan 08 2024
+ * \date Jan 10 2024
  * \brief Functions for handling the timing of events
  */
 
