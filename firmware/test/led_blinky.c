@@ -14,8 +14,9 @@
 
 
 int main(void) {
-  led_init();
   board_init();
+
+  led_init();
   timing_arch_init();
 
   led_on();
