@@ -59,9 +59,6 @@ int main(void) {
     }
 
     if(ms100_loop_check()) {
-      if(line_state == USB_CONNECTED) {
-        led_toggle();
-      }
     }
 
     if(s1_loop_check()) {
