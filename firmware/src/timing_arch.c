@@ -10,68 +10,54 @@
 
 #include <bsp/board.h>
 #include <pico/sem.h>
+#include <hardware/timer.h>
+#include <hardware/irq.h>
 
 #include "results.h"
 #include "timing_arch.h"
+#include "led_utils.h"
+
+#define ALARM0_OFFSET 0x10
+#define ALARM1_OFFSET 0x14
+#define ALARM2_OFFSET 0x18
+#define ALARM3_OFFSET 0x1C
 
 // Semaphores
-static semaphore_t ms5_fired;
-static semaphore_t ms10_fired;
-static semaphore_t ms100_fired;
-static semaphore_t s1_fired;
-
-volatile static alarm_id_t ms5_alarm_id;
-volatile static alarm_id_t ms10_alarm_id;
-volatile static alarm_id_t ms100_alarm_id;
-volatile static alarm_id_t s1_alarm_id;
+static bool ms5_fired;
+static bool ms10_fired;
+static bool ms100_fired;
+static bool s1_fired;
 
 /*
  * \fn bool alarm_5ms_cback()
  * \brief Executes every 5ms and resets semaphore for that timing block
- * \param alarm_id_t id - id of the alarm
- * \param void* user_data - UNUSED
- * \returns true if repeating should continue
  */
-static bool alarm_5ms_cback(struct repeating_timer *t) {
-  sem_release(&ms5_fired);
-  return true;
+static void alarm_5ms_cback() {
+  ms5_fired = true;
 }
 
 /*
  * \fn bool alarm_10ms_cback()
  * \brief Executes every 10ms and resets semaphore for that timing block
- * \param alarm_id_t id - id of the alarm
- * \param void* user_data - UNUSED
- * \returns true if repeating should continue
  */
-static bool alarm_10ms_cback(struct repeating_timer *t) {
-  sem_release(&ms10_fired);
-  return true;
+static void alarm_10ms_cback() {
+  ms10_fired = true;
 }
 
 /*
  * \fn bool alarm_100ms_cback()
  * \brief Executes every 100ms and resets semaphore for that timing block
- * \param alarm_id_t id - id of the alarm
- * \param void* user_data - UNUSED
- * \returns true if repeating should continue
  */
-static bool alarm_100ms_cback(struct repeating_timer *t) {
-  sem_release(&ms100_fired);
-  return true;
+static bool alarm_100ms_cback() {
+  ms100_fired = true;
 }
 
 /*
  * \fn bool alarm_1s_cback()
  * \brief Executes every 1s and resets semaphore for that timing block
- * \param alarm_id_t id - id of the alarm
- * \param void* user_data - UNUSED
- * \returns RESULT_SUCCESS on successful execution
- * \returns true if repeating should continue
  */
-static bool alarm_1s_cback(struct repeating_timer *t) {
-  sem_release(&s1_fired);
-  return true;
+static bool alarm_1s_cback() {
+  s1_fired = true;
 }
 
 /*
@@ -81,19 +67,17 @@ static bool alarm_1s_cback(struct repeating_timer *t) {
 void timing_arch_init() {
   alarm_pool_init_default();
 
-  sem_init(&ms5_alarm_id, 0, 1);
-  sem_init(&ms10_alarm_id, 0, 1);
-  sem_init(&ms100_alarm_id, 0, 1);
-  sem_init(&s1_alarm_id, 0, 1);
+  ms5_fired = false;
+  ms10_fired = false;
+  ms100_fired = false;
+  s1_fired = false;
 
-  struct repeating_timer timer;
-  s1_alarm_id = add_repeating_timer_ms(1000U, alarm_1s_cback, NULL, &timer);
-  sleep_ms(1U);
-  ms100_alarm_id = add_repeating_timer_ms(100U, alarm_100ms_cback, NULL, &timer);
-  sleep_ms(1U);
-  ms10_alarm_id = add_repeating_timer_ms(10U, alarm_10ms_cback, NULL, &timer);
-  sleep_ms(1U);
-  ms5_alarm_id = add_repeating_timer_ms(5U, alarm_5ms_cback, NULL, &timer);
+  hw_set_bits(&timer_hw->inte,
+              ( (1U << ALARM0_OFFSET)
+              | (1U << ALARM1_OFFSET)
+              | (1U << ALARM2_OFFSET)
+              | (1U << ALARM3_OFFSET)
+              );
 }
 
 /*

@@ -11,17 +11,20 @@ add_executable(${PROJECT_NAME}
 )
 
 # Tests
-add_executable(test_debug_uart
-  test/test_debug_uart.c
+add_executable(debug_uart
+  test/debug_uart.c
 )
-add_executable(test_keypress
-  test/test_keypress.c
+add_executable(keypress
+  test/keypress.c
 )
-add_executable(test_print
-  test/test_print.c
+add_executable(led_blinky
+  test/led_blinky.c
 )
-add_executable(test_xboard_comms
-  test/test_xboard_comms.c
+add_executable(print
+  test/print.c
+)
+add_executable(xboard_comms
+  test/xboard_comms.c
 )
 
 
@@ -31,19 +34,23 @@ target_compile_options(${PROJECT_NAME} PUBLIC
 )
 
 # Tests
-target_compile_options(test_debug_uart PUBLIC
+target_compile_options(debug_uart PUBLIC
   -g
   -O0
 )
-target_compile_options(test_keypress PUBLIC
+target_compile_options(keypress PUBLIC
   -g
   -O0
 )
-target_compile_options(test_print PUBLIC
+target_compile_options(led_blinky PUBLIC
   -g
   -O0
 )
-target_compile_options(test_xboard_comms PUBLIC
+target_compile_options(print PUBLIC
+  -g
+  -O0
+)
+target_compile_options(xboard_comms PUBLIC
   -g
   -O0
 )
@@ -60,7 +67,7 @@ target_sources(${PROJECT_NAME} PUBLIC
 )
 
 # Tests
-target_sources(test_debug_uart PUBLIC
+target_sources(debug_uart PUBLIC
   src/debug_uart.c
   src/hid_task.c
   src/led_utils.c
@@ -68,7 +75,7 @@ target_sources(test_debug_uart PUBLIC
   src/usb_descriptors.c
   src/usb_detect.c
 )
-target_sources(test_keypress PUBLIC
+target_sources(keypress PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
@@ -76,7 +83,11 @@ target_sources(test_keypress PUBLIC
   src/usb_descriptors.c
   src/usb_detect.c
 )
-target_sources(test_print PUBLIC
+target_sources(led_blinky PUBLIC
+  src/led_utils.c
+  src/timing_arch.c
+)
+target_sources(print PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
@@ -85,7 +96,7 @@ target_sources(test_print PUBLIC
   src/usb_detect.c
   src/xboard_comms.c
 )
-target_sources(test_xboard_comms PUBLIC
+target_sources(xboard_comms PUBLIC
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
@@ -99,15 +110,17 @@ target_sources(test_xboard_comms PUBLIC
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
 
 # Tests
-target_include_directories(test_debug_uart PUBLIC inc)
-target_include_directories(test_keypress PUBLIC inc)
-target_include_directories(test_print PUBLIC inc)
-target_include_directories(test_xboard_comms PUBLIC inc)
+target_include_directories(debug_uart PUBLIC inc)
+target_include_directories(keypress PUBLIC inc)
+target_include_directories(led_blinky PUBLIC inc)
+target_include_directories(print PUBLIC inc)
+target_include_directories(xboard_comms PUBLIC inc)
 
-target_link_libraries(${PROJECT_NAME} pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
+target_link_libraries(${PROJECT_NAME} pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
 
 # Tests
-target_link_libraries(test_debug_uart tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
-target_link_libraries(test_keypress tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
-target_link_libraries(test_print pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers)
-target_link_libraries(test_xboard_comms tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers)
+target_link_libraries(debug_uart tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
+target_link_libraries(keypress tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
+target_link_libraries(led_blinky tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
+target_link_libraries(print pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
+target_link_libraries(xboard_comms tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
