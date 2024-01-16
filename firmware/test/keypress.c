@@ -14,6 +14,7 @@
 #include "keymap.h"
 #include "pinmap.h"
 #include "led_utils.h"
+#include "timing_arch.h"
 #include "usb_descriptors.h"
 
 #define NUM_KEYS 8U
@@ -32,6 +33,7 @@ int main(void) {
   board_init();
   tusb_init();
   init_keys(true);
+  timing_arch_init();
 
   uint8_t key = 0;
   uint8_t keycode[6] = {0};
@@ -41,6 +43,7 @@ int main(void) {
 
   while(true){
     tud_task();
+    if(ms_loop_check()) {
 
       if(key_is_pressed){
         if(tud_hid_ready()){
@@ -71,7 +74,8 @@ int main(void) {
         }
       }
     }
-
-
+    if(s1_loop_check()) {
       led_toggle();
+    }
+  }
 }

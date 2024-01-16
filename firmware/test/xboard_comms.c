@@ -18,6 +18,7 @@
 #include "keymap.h"
 #include "pinmap.h"
 #include "led_utils.h"
+#include "timing_arch.h"
 #include "usb_descriptors.h"
 #include "xboard_comms.h"
 
@@ -109,6 +110,8 @@ int main(void) {
   // Initialize UART but don't initialize irq because unit test one will be used instead
   xboard_comms_init(false);
 
+  timing_arch_init();
+
   irq_set_exclusive_handler(UART0_IRQ, test_rx_irq);
   irq_set_enabled(UART0_IRQ, true);
   uart_set_irq_enables(uart0, true, false);
@@ -121,6 +124,7 @@ int main(void) {
   while(true){
     tud_task();
 
+    if(ms_loop_check()) {
       if(msg_rdy){
         if(tud_hid_ready()){
           keycode[0] = key_array[key];
@@ -144,6 +148,11 @@ int main(void) {
         }
       }
     }
+  }
+
+  if(s1_loop_check()) {
+    led_toggle();
+  }
 
 }
 
