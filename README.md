@@ -18,5 +18,4 @@
  * Tests
    * test debug_print test
      * unclear why uart isn't working
- * Timing Architecture
-   * Writing interrupt based timing architecture
+ * CD timer blocks non mod keys through xcoms
