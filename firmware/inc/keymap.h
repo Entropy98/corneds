@@ -53,9 +53,6 @@
 #define MOD_MASK_RIGHT 0x1
 #define MOD_MASK_LEFT  0x2
 
-
-#define KEY_COOLDOWN_MS 30U
-
 #define KBDSIDE_RIGHT 1U
 #define KBDSIDE_LEFT 2U
 

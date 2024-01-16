@@ -14,12 +14,13 @@
 #include "timing_arch.h"
 
 #define STATE_DURATION_S 5
-#define NUM_LED_STATES 4
+#define NUM_LED_STATES 5
 
-#define MS5_STATE 0
-#define MS10_STATE 1
-#define MS100_STATE 2
-#define S1_STATE 3
+#define MS_STATE    0
+#define MS5_STATE   1
+#define MS10_STATE  2
+#define MS100_STATE 3
+#define S1_STATE    4
 
 static uint8_t led_interval_state = 0;
 static uint8_t state_time_s = 0;
@@ -43,6 +44,11 @@ int main(void) {
   led_on();
 
   while(true){
+    if(ms_loop_check()) {
+      if(led_interval_state == MS_STATE) {
+        led_toggle();
+      }
+    }
     if(ms5_loop_check()) {
       if(led_interval_state == MS5_STATE){
         led_toggle();

@@ -10,6 +10,7 @@
 
 #include <pico/stdlib.h>
 
+bool ms_loop_check();
 bool ms5_loop_check();
 bool ms10_loop_check();
 bool ms100_loop_check();

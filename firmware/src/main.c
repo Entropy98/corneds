@@ -1,7 +1,7 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Jan 08 2024
+ * \date Jan 15 2024
  * \brief Firmware for corneDS split 40% keyboard
  */
 
@@ -48,14 +48,16 @@ int main(void) {
 
   while(1) {
     tud_task();
-    if(ms5_loop_check()) {
+    if(ms_loop_check()) {
       poll_keypresses();
-    }
-
-    if(ms10_loop_check()) {
       if(line_state == USB_CONNECTED) {
         send_hid_report();
       }
+    }
+    if(ms5_loop_check()) {
+    }
+
+    if(ms10_loop_check()) {
     }
 
     if(ms100_loop_check()) {
