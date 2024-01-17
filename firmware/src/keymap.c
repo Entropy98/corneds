@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Dec 21 2023
+ * \date Jan 17 2024
  * \brief mapping of keys to functions
  */
 
@@ -63,7 +63,10 @@ static keymap_t lowered_map_l = {{ HID_KEY_F5,        HID_KEY_F4,         HID_KE
                                  { HID_KEY_PAGE_UP,   HID_KEY_NONE,       HID_KEY_NONE,    HID_KEY_END,  HID_KEY_HOME, HID_KEY_CONTROL_LEFT},
                                  { HID_KEY_PAGE_DOWN, MACRO_GREATER_THAN, MACRO_LESS_THAN, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_SHIFT_LEFT}};
 
-static keymap_t key_cooldowns = {{0}};
+static keymap_t key_cooldowns = {{0U, 0U, 0U, 0U, 0U, 0U},
+                                 {0U, 0U, 0U, 0U, 0U, 0U},
+                                 {0U, 0U, 0U, 0U, 0U, 0U},
+                                 {0U, 0U, 0U, 0U, 0U, 0U}};
 /*
  * \fn bool key_buffer_contains()
  * \brief checks if the key buffer contains an item
@@ -249,6 +252,7 @@ uint8_t kbd_side_get(){
  * \brief populates key_buffer with pressed keys
  */
 void poll_keypresses() {
+  uint8_t key_cooldown = 0;
   uint32_t keys_pressed_by_col[NUM_COLS] = {0};
 
   if(!key_buffer_full()){
@@ -261,8 +265,9 @@ void poll_keypresses() {
 
     for(uint8_t col=0; col<NUM_COLS; col++){
       for(uint8_t row=0; row<NUM_ROWS; row++){
+        key_cooldown = key_cooldowns[row][NUM_COLS - col - 1];
         if(keys_pressed_by_col[col] & row_masks[row]){
-          if(key_cooldowns[row][NUM_COLS - col - 1] == 0U) {
+          if(key_cooldown == 0U) {
             key_cooldowns[row][NUM_COLS - col -1] = KEY_COOLDOWN_MS;
             if((col == SHIFT_COL) && (row == SHIFT_ROW)){
               if ((kbd_side_get() == KBDSIDE_RIGHT)
@@ -306,11 +311,8 @@ void poll_keypresses() {
               }
             }
             else {
-              xboard_comms_send(col, row);
             }
-          }
-          else {
-            key_cooldowns[row][NUM_COLS - col - 1]--;
+            xboard_comms_send(col, row);
           }
         }
         else {
@@ -347,6 +349,9 @@ void poll_keypresses() {
           if(change_queued){
             xboard_comms_send(XBOARD_PKT_INVALID, XBOARD_PKT_INVALID);
           }
+        }
+        if(key_cooldown > 0) {
+          key_cooldowns[row][NUM_COLS - col - 1]--;
         }
       }
     }
