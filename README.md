@@ -18,4 +18,5 @@
  * Tests
    * test debug_print test
      * unclear why uart isn't working
- * CD timer blocks non mod keys through xcoms
+ * Shift latches on main kbd
+ * USB connected does not discern properly
