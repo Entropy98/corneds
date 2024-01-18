@@ -18,5 +18,4 @@
  * Tests
    * test debug_print test
      * unclear why uart isn't working
- * Shift latches on main kbd
- * USB connected does not discern properly
+ * Shift latches

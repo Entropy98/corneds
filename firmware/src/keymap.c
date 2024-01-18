@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Jan 17 2024
+ * \date Jan 18 2024
  * \brief mapping of keys to functions
  */
 
@@ -17,7 +17,7 @@
 
 #define KEY_COOLDOWN_MS 2
 
-static bool main_kbd = true;
+static bool main_kbd = false;
 static uint8_t kbd_side = 0U;
 
 static volatile uint8_t key_buffer[KEY_BUFFER_SIZE];
@@ -192,7 +192,7 @@ void ctrl_set(bool pressed) {
  * \brief initializes the appropraite GPIOs
  * \param bool is_main - true if this device is connected to USB
  */
-void init_keys(bool is_main) {
+void init_keys() {
   gpio_init(KEYROW0_PIN);
   gpio_init(KEYROW1_PIN);
   gpio_init(KEYROW2_PIN);
@@ -229,7 +229,6 @@ void init_keys(bool is_main) {
   gpio_set_dir(KEYCOL5_PIN, GPIO_OUT);
   gpio_set_dir(SIDESELECT_PIN, GPIO_IN);
 
-  main_kbd = is_main;
   if (gpio_get(SIDESELECT_PIN) == 0U) {
     kbd_side = KBDSIDE_RIGHT;
   }
@@ -245,6 +244,24 @@ void init_keys(bool is_main) {
  */
 uint8_t kbd_side_get(){
   return kbd_side;
+}
+
+/*
+ * \fn bool keymap_main_kbd_get()
+ * \brief getter for main_kbd
+ * \returns true if the keyboard is connected to USB
+ */
+bool keymap_main_kbd_get() {
+  return main_kbd;
+}
+
+/*
+ * \fn bool keymap_main_kbd_set()
+ * \brief setter for main_kbd
+ * \param is_main - true if this keyboard is connected via usb
+ */
+bool keymap_main_kbd_set(bool is_main) {
+  main_kbd = is_main;
 }
 
 /*
@@ -311,8 +328,8 @@ void poll_keypresses() {
               }
             }
             else {
+              xboard_comms_send(col, row);
             }
-            xboard_comms_send(col, row);
           }
         }
         else {

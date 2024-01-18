@@ -1,7 +1,7 @@
 /*
  * \file keymap.h
  * \author Harper Weigle
- * \date Dec 15 2023
+ * \date Jan 18 2024
  * \brief mapping of keys to functions
  */
 
@@ -62,8 +62,10 @@ bool alt_get();
 void alt_set(bool pressed);
 bool ctrl_get();
 void ctrl_set(bool pressed);
-void init_keys(bool is_main);
+void init_keys();
 uint8_t kbd_side_get();
+bool keymap_main_kbd_get();
+bool keymap_main_kbd_set(bool is_main);
 void poll_keypresses();
 void push_keypress(uint8_t col, uint8_t row, bool is_right_side);
 uint8_t get_keypress();

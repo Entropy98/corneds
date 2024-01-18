@@ -1,7 +1,7 @@
 /*
  * \file xboard_comms.h
  * \author Harper Weigle
- * \date Dec 13 2023
+ * \date Jan 18 2024
  * \brief interfacing between sides of the keyboard
  */
 
@@ -31,7 +31,7 @@
 
 #define XBOARD_PKT_INVALID    0x3F
 
-void xboard_comms_init(bool is_main);
+void xboard_comms_init();
 void xboard_comms_send(uint8_t col, uint8_t row);
 
 #endif //_INC_XBOARD_COMMS_H

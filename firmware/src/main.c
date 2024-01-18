@@ -1,7 +1,7 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Jan 15 2024
+ * \date Jan 18 2024
  * \brief Firmware for corneDS split 40% keyboard
  */
 
@@ -26,31 +26,27 @@ int main(void) {
   debug_uart_init();
   timing_arch_init();
 
-  uint8_t line_state = usb_detected();
-
-  xboard_comms_init(line_state == USB_CONNECTED);
-  init_keys(line_state == USB_CONNECTED);
-
-  debug_print("CorneDS 40% Keyboard\n");
-  if(line_state == USB_CONNECTED){
-    debug_print("Initializing with USB Connected\n");
-  }
-  else {
-    debug_print("Initializing with USB Disconnected\n");
-  }
-
-  if(kbd_side_get() == KBDSIDE_RIGHT) {
-    debug_print("Initializing as Right Side\n");
-  }
-  else {
-    debug_print("Initializing as Left Side\n");
-  }
+  xboard_comms_init();
+  init_keys();
 
   while(1) {
     tud_task();
+
+    if(usb_state_check()) {
+      switch (usb_state_get()) {
+        case USB_STATE_MOUNTED:
+          keymap_main_kbd_set(true);
+          break;
+        case USB_STATE_UNMOUNTED:
+        case USB_STATE_SUSPENDED:
+        default:
+          keymap_main_kbd_set(false);
+      }
+    }
+
     if(ms_loop_check()) {
       poll_keypresses();
-      if(line_state == USB_CONNECTED) {
+      if(usb_state_get() == USB_STATE_MOUNTED) {
         send_hid_report();
       }
     }
@@ -64,7 +60,7 @@ int main(void) {
     }
 
     if(s1_loop_check()) {
-      if(line_state == USB_CONNECTED) {
+      if(usb_state_get() != USB_STATE_MOUNTED) {
         led_toggle();
       }
     }
