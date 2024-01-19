@@ -16,8 +16,8 @@
 #include "timing_arch.h"
 #include "led_utils.h"
 
-#define ALARM_NUM 0
-#define ALARM_IRQ TIMER_IRQ_0
+#define TIMING_ARCH_ALARM_NUM 0
+#define TIMING_ARCH_ALARM_IRQ TIMER_IRQ_0
 
 #define SHORTEST_LOOP_INTERVAL_US 1000U
 
@@ -37,8 +37,8 @@ static volatile uint8_t ms100_counter;
  * \brief sets the 5ms alarm that ticks up for the timing archs timers
  */
 static void set_alarm() {
-  hw_set_bits(&timer_hw->inte, 1U << ALARM_NUM);
-  timer_hw->alarm[ALARM_NUM] = timer_hw->timerawl + SHORTEST_LOOP_INTERVAL_US;
+  hw_set_bits(&timer_hw->inte, 1U << TIMING_ARCH_ALARM_NUM);
+  timer_hw->alarm[TIMING_ARCH_ALARM_NUM] = timer_hw->timerawl + SHORTEST_LOOP_INTERVAL_US;
 }
 
 /*
@@ -100,7 +100,7 @@ static void alarm_5ms_cback() {
  * \brief Executes every 5ms and increments timers accordingly
  */
 static void alarm_ms_cback() {
-  hw_clear_bits(&timer_hw->intr, 1U << ALARM_NUM);
+  hw_clear_bits(&timer_hw->intr, 1U << TIMING_ARCH_ALARM_NUM);
   ms_fired = true;
   if(ms_counter == 5U) {
     alarm_5ms_cback();
@@ -128,9 +128,9 @@ void timing_arch_init() {
   ms10_counter = 0U;
   ms100_counter = 0U;
 
-  hw_set_bits(&timer_hw->inte, 1u << ALARM_NUM);
-  irq_set_exclusive_handler(ALARM_IRQ, alarm_ms_cback);
-  irq_set_enabled(ALARM_IRQ, true);
+  hw_set_bits(&timer_hw->inte, 1u << TIMING_ARCH_ALARM_NUM);
+  irq_set_exclusive_handler(TIMING_ARCH_ALARM_IRQ, alarm_ms_cback);
+  irq_set_enabled(TIMING_ARCH_ALARM_IRQ, true);
   set_alarm();
 }
 /*
