@@ -9,9 +9,9 @@
 #define _INC_TIMING_ARCH_H
 
 #include <bsp/board.h>
-#include <hardware/timer.h>
 #include <hardware/irq.h>
 
+#include "alarm_utils.h"
 #include "results.h"
 #include "timing_arch.h"
 #include "led_utils.h"
@@ -31,15 +31,6 @@ static volatile uint8_t ms_counter;
 static volatile uint8_t ms5_counter;
 static volatile uint8_t ms10_counter;
 static volatile uint8_t ms100_counter;
-
-/*
- * \fn void set_alarm
- * \brief sets the 5ms alarm that ticks up for the timing archs timers
- */
-static void set_alarm() {
-  hw_set_bits(&timer_hw->inte, 1U << TIMING_ARCH_ALARM_NUM);
-  timer_hw->alarm[TIMING_ARCH_ALARM_NUM] = timer_hw->timerawl + SHORTEST_LOOP_INTERVAL_US;
-}
 
 /*
  * \fn bool alarm_s_cback()
@@ -100,7 +91,7 @@ static void alarm_5ms_cback() {
  * \brief Executes every 5ms and increments timers accordingly
  */
 static void alarm_ms_cback() {
-  hw_clear_bits(&timer_hw->intr, 1U << TIMING_ARCH_ALARM_NUM);
+  alarm_clear(TIMING_ARCH_ALARM_NUM);
   ms_fired = true;
   if(ms_counter == 5U) {
     alarm_5ms_cback();
@@ -109,7 +100,7 @@ static void alarm_ms_cback() {
   else {
     ms_counter++;
   }
-  set_alarm();
+  alarm_set(TIMING_ARCH_ALARM_NUM, SHORTEST_LOOP_INTERVAL_US);
 }
 
 /*
@@ -128,10 +119,8 @@ void timing_arch_init() {
   ms10_counter = 0U;
   ms100_counter = 0U;
 
-  hw_set_bits(&timer_hw->inte, 1u << TIMING_ARCH_ALARM_NUM);
-  irq_set_exclusive_handler(TIMING_ARCH_ALARM_IRQ, alarm_ms_cback);
-  irq_set_enabled(TIMING_ARCH_ALARM_IRQ, true);
-  set_alarm();
+  alarm_init(TIMING_ARCH_ALARM_NUM, TIMING_ARCH_ALARM_IRQ, alarm_ms_cback);
+  alarm_set(TIMING_ARCH_ALARM_NUM, SHORTEST_LOOP_INTERVAL_US);
 }
 /*
  * \fn bool ms_loop_check()
