@@ -414,7 +414,7 @@ void push_keypress(uint8_t col, uint8_t row, bool is_right_side){
       switch (col) {
         case ALTGUI_COL:
           if(is_right_side){
-            key_buffer_push(HID_KEY_ALT_RIGHT);
+            key_buffer_push(HID_KEY_ALT_LEFT);
           }
           else {
             key_buffer_push(HID_KEY_GUI_RIGHT);
