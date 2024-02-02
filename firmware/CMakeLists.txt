@@ -56,9 +56,11 @@ target_compile_options(xboard_comms PUBLIC
 )
 
 target_sources(${PROJECT_NAME} PUBLIC
+  src/alarm_utils.c
   src/debug_uart.c
   src/hid_task.c
   src/keymap.c
+  src/led_sm.c
   src/led_utils.c
   src/timing_arch.c
   src/usb_descriptors.c
@@ -68,6 +70,7 @@ target_sources(${PROJECT_NAME} PUBLIC
 
 # Tests
 target_sources(debug_uart PUBLIC
+  src/alarm_utils.c
   src/debug_uart.c
   src/hid_task.c
   src/led_utils.c
@@ -76,6 +79,7 @@ target_sources(debug_uart PUBLIC
   src/usb_detect.c
 )
 target_sources(keypress PUBLIC
+  src/alarm_utils.c
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
@@ -84,10 +88,12 @@ target_sources(keypress PUBLIC
   src/usb_detect.c
 )
 target_sources(led_blinky PUBLIC
+  src/alarm_utils.c
   src/led_utils.c
   src/timing_arch.c
 )
 target_sources(print PUBLIC
+  src/alarm_utils.c
   src/hid_task.c
   src/keymap.c
   src/led_utils.c
@@ -97,6 +103,7 @@ target_sources(print PUBLIC
   src/xboard_comms.c
 )
 target_sources(xboard_comms PUBLIC
+  src/alarm_utils.c
   src/hid_task.c
   src/keymap.c
   src/led_utils.c

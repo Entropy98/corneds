@@ -12,6 +12,7 @@
 #include "debug_uart.h"
 #include "hid_task.h"
 #include "keymap.h"
+#include "led_sm.h"
 #include "led_utils.h"
 #include "timing_arch.h"
 #include "usb_descriptors.h"
@@ -25,9 +26,12 @@ int main(void) {
   tusb_init();
   debug_uart_init();
   timing_arch_init();
+  led_sm_init();
 
   xboard_comms_init();
   init_keys();
+
+  led_sm_set_transition(LED_STATE_STARTUP);
 
   while(1) {
     tud_task();
