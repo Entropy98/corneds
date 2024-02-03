@@ -1,13 +1,13 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Feb 2 2024
+ * \date Feb 3 2024
  * \brief Firmware for corneDS split 40% keyboard
  */
 
-#include "bsp/board.h"
-#include "pico/stdlib.h"
-#include "tusb.h"
+#include <pico/stdlib.h>
+#include <hardware/watchdog.h>
+#include <tusb.h>
 
 #include "debug_uart.h"
 #include "hid_task.h"
@@ -19,10 +19,9 @@
 #include "usb_detect.h"
 #include "xboard_comms.h"
 
-int main(void) {
-  board_init();
+#define WATCHDOG_TIMEOUT_MS 2000U
 
-  led_init();
+int main(void) {
   tusb_init();
   debug_uart_init();
   timing_arch_init();
@@ -30,6 +29,8 @@ int main(void) {
 
   xboard_comms_init();
   init_keys();
+
+  watchdog_enable(WATCHDOG_TIMEOUT_MS, true);
 
   led_sm_set_transition(LED_STATE_STARTUP);
 
@@ -66,6 +67,7 @@ int main(void) {
     }
 
     if(s1_loop_check()) {
+      watchdog_update();
     }
   }
 

@@ -1,7 +1,7 @@
 /*
  * \file led_utils.c
  * \author Harper Weigle
- * \date May 11 2023
+ * \date Feb 3 2023
  * \brief LED utilities
  */
 
@@ -15,16 +15,20 @@
 #define BOARD_LED 25
 
 static uint8_t led_state;
+static bool initialized = false;
 
 /*
  * \fn void led_init()
  * \brief initializes the board LED
  */
 void led_init(){
-  gpio_init(BOARD_LED);
-  gpio_set_dir(BOARD_LED, GPIO_OUT);
-  gpio_put(BOARD_LED, 0);
-  led_state = 0;
+  if(!initialized) {
+    gpio_init(BOARD_LED);
+    gpio_set_dir(BOARD_LED, GPIO_OUT);
+    gpio_put(BOARD_LED, 0);
+    led_state = 0;
+    initialized = true;
+  }
 }
 
 /*

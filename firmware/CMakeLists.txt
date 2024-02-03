@@ -26,6 +26,9 @@ add_executable(print
 add_executable(xboard_comms
   test/xboard_comms.c
 )
+add_executable(watchdog
+  test/watchdog.c
+)
 
 
 target_compile_options(${PROJECT_NAME} PUBLIC
@@ -51,6 +54,10 @@ target_compile_options(print PUBLIC
   -O0
 )
 target_compile_options(xboard_comms PUBLIC
+  -g
+  -O0
+)
+target_compile_options(watchdog PUBLIC
   -g
   -O0
 )
@@ -112,6 +119,12 @@ target_sources(xboard_comms PUBLIC
   src/usb_detect.c
   src/xboard_comms.c
 )
+target_sources(watchdog PUBLIC
+  src/alarm_utils.c
+  src/led_sm.c
+  src/led_utils.c
+  src/timing_arch.c
+)
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
@@ -122,12 +135,69 @@ target_include_directories(keypress PUBLIC inc)
 target_include_directories(led_blinky PUBLIC inc)
 target_include_directories(print PUBLIC inc)
 target_include_directories(xboard_comms PUBLIC inc)
+target_include_directories(watchdog PUBLIC inc)
 
-target_link_libraries(${PROJECT_NAME} pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
+target_link_libraries(${PROJECT_NAME}
+  pico_stdlib
+  tinyusb_device
+  tinyusb_board
+  hardware_regs_headers
+  hardware_structs_headers
+  hardware_timer
+  hardware_irq
+  hardware_watchdog
+)
 
 # Tests
-target_link_libraries(debug_uart tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
-target_link_libraries(keypress tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
-target_link_libraries(led_blinky tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
-target_link_libraries(print pico_stdlib tinyusb_device tinyusb_board hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
-target_link_libraries(xboard_comms tinyusb_device tinyusb_board pico_stdlib hardware_regs_headers hardware_structs_headers hardware_timer hardware_irq)
+target_link_libraries(debug_uart
+  tinyusb_device
+  tinyusb_board
+  pico_stdlib
+  hardware_regs_headers
+  hardware_structs_headers
+  hardware_timer
+  hardware_irq
+)
+target_link_libraries(keypress
+  tinyusb_device
+  tinyusb_board
+  pico_stdlib
+  hardware_regs_headers
+  hardware_structs_headers
+  hardware_timer
+  hardware_irq
+)
+target_link_libraries(led_blinky
+  tinyusb_device
+  tinyusb_board
+  pico_stdlib
+  hardware_regs_headers
+  hardware_structs_headers
+  hardware_timer
+  hardware_irq
+)
+target_link_libraries(print
+  pico_stdlib
+  tinyusb_device
+  tinyusb_board
+  hardware_regs_headers
+  hardware_structs_headers
+  hardware_timer
+  hardware_irq
+)
+target_link_libraries(xboard_comms
+  tinyusb_device
+  tinyusb_board
+  pico_stdlib
+  hardware_regs_headers
+  hardware_structs_headers
+  hardware_timer
+  hardware_irq
+)
+target_link_libraries(watchdog
+  pico_stdlib
+  hardware_regs_headers
+  hardware_structs_headers
+  hardware_timer
+  hardware_irq
+)

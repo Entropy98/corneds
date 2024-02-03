@@ -1,11 +1,10 @@
 /*
  * \file led_sm.c
  * \author Harper Weigle
- * \date Feb 2 2024
+ * \date Feb 3 2024
  * \brief Functions for handling the led behavior
  */
 
-#include <bsp/board.h>
 #include <hardware/timer.h>
 #include <hardware/irq.h>
 
@@ -22,6 +21,8 @@
 #define STARTUP_NUM_BLINKS 4U
 #define MOUNT_NUM_BLINKS 10U
 #define UNMOUNT_NUM_BLINKS 12U
+
+static bool initialized = false;
 
 static uint32_t startup_behavior[STARTUP_NUM_BLINKS] = {LED_SHORT_PAUSE_US,
                                                         LED_SHORT_PAUSE_US,
@@ -121,9 +122,13 @@ static void iterate_sm() {
  * \brief initializes the state machine handling LED behavior
  */
 void led_sm_init() {
-  led_sm_curr_state = LED_STATE_IDLE;
-  led_sm_next_state = LED_STATE_IDLE;
-  alarm_init(LED_SM_ALARM_NUM, LED_SM_ALARM_IRQ, iterate_sm);
+  if(!initialized) {
+    led_init();
+    led_sm_curr_state = LED_STATE_IDLE;
+    led_sm_next_state = LED_STATE_IDLE;
+    alarm_init(LED_SM_ALARM_NUM, LED_SM_ALARM_IRQ, iterate_sm);
+    initialized = true;
+  }
 }
 
 /*

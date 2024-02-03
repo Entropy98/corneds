@@ -1,14 +1,10 @@
 /*
  * \file timing_arch.c
  * \author Harper Weigle
- * \date Jan 10 2024
+ * \date Feb 3 2024
  * \brief Functions for handling the timing of events
  */
 
-#ifndef _INC_TIMING_ARCH_H
-#define _INC_TIMING_ARCH_H
-
-#include <bsp/board.h>
 #include <hardware/irq.h>
 
 #include "alarm_utils.h"
@@ -177,5 +173,3 @@ bool s1_loop_check() {
   s_fired = false;
   return ready;
 }
-
-#endif //_INC_TIMING_ARCH_H
