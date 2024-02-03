@@ -18,4 +18,3 @@
  * Tests
    * test debug_print test
      * unclear why uart isn't working
- * Shift latches

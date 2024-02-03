@@ -1,7 +1,7 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Jan 18 2024
+ * \date Feb 2 2024
  * \brief Firmware for corneDS split 40% keyboard
  */
 
@@ -12,6 +12,7 @@
 #include "debug_uart.h"
 #include "hid_task.h"
 #include "keymap.h"
+#include "led_sm.h"
 #include "led_utils.h"
 #include "timing_arch.h"
 #include "usb_descriptors.h"
@@ -25,9 +26,12 @@ int main(void) {
   tusb_init();
   debug_uart_init();
   timing_arch_init();
+  led_sm_init();
 
   xboard_comms_init();
   init_keys();
+
+  led_sm_set_transition(LED_STATE_STARTUP);
 
   while(1) {
     tud_task();
@@ -36,10 +40,12 @@ int main(void) {
       switch (usb_state_get()) {
         case USB_STATE_MOUNTED:
           keymap_main_kbd_set(true);
+          led_sm_set_transition(LED_STATE_MOUNT);
           break;
         case USB_STATE_UNMOUNTED:
         case USB_STATE_SUSPENDED:
         default:
+          led_sm_set_transition(LED_STATE_UNMOUNT);
           keymap_main_kbd_set(false);
       }
     }
@@ -60,9 +66,6 @@ int main(void) {
     }
 
     if(s1_loop_check()) {
-      if(usb_state_get() != USB_STATE_MOUNTED) {
-        led_toggle();
-      }
     }
   }
 
