@@ -1,7 +1,7 @@
 /*
  * \file main.c
  * \author Harper Weigle
- * \date Jan 18 2024
+ * \date Feb 2 2024
  * \brief Firmware for corneDS split 40% keyboard
  */
 
@@ -40,10 +40,12 @@ int main(void) {
       switch (usb_state_get()) {
         case USB_STATE_MOUNTED:
           keymap_main_kbd_set(true);
+          led_sm_set_transition(LED_STATE_MOUNT);
           break;
         case USB_STATE_UNMOUNTED:
         case USB_STATE_SUSPENDED:
         default:
+          led_sm_set_transition(LED_STATE_UNMOUNT);
           keymap_main_kbd_set(false);
       }
     }
@@ -64,9 +66,6 @@ int main(void) {
     }
 
     if(s1_loop_check()) {
-      if(usb_state_get() != USB_STATE_MOUNTED) {
-        led_toggle();
-      }
     }
   }
 
