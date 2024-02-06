@@ -56,6 +56,7 @@ int main(void) {
       if(usb_state_get() == USB_STATE_MOUNTED) {
         send_hid_report();
       }
+      decrement_cooldowns();
     }
     if(ms5_loop_check()) {
     }

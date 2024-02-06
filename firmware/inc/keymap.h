@@ -62,6 +62,7 @@ bool alt_get();
 void alt_set(bool pressed);
 bool ctrl_get();
 void ctrl_set(bool pressed);
+void decrement_cooldowns();
 void init_keys();
 uint8_t kbd_side_get();
 bool keymap_main_kbd_get();

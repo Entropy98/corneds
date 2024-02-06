@@ -1,7 +1,7 @@
 /*
  * \file keyamp.c
  * \author Harper Weigle
- * \date Jan 18 2024
+ * \date Feb 6 2024
  * \brief mapping of keys to functions
  */
 
@@ -15,7 +15,7 @@
 #include "pinmap.h"
 #include "xboard_comms.h"
 
-#define KEY_COOLDOWN_MS 0
+#define KEY_COOLDOWN_MS 30U
 
 static bool main_kbd = false;
 static uint8_t kbd_side = 0U;
@@ -67,6 +67,10 @@ static keymap_t key_cooldowns = {{0U, 0U, 0U, 0U, 0U, 0U},
                                  {0U, 0U, 0U, 0U, 0U, 0U},
                                  {0U, 0U, 0U, 0U, 0U, 0U},
                                  {0U, 0U, 0U, 0U, 0U, 0U}};
+static keymap_t key_locks = {{HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE},
+                            {HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE},
+                            {HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE},
+                            {HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE}};
 /*
  * \fn bool key_buffer_contains()
  * \brief checks if the key buffer contains an item
@@ -188,6 +192,22 @@ void ctrl_set(bool pressed) {
 }
 
 /*
+ * \fn void decrement_cooldowns()
+ * \brief decrements the key cooldowns
+ */
+void decrement_cooldowns() {
+  uint8_t cooldown = 0;
+  for(uint8_t row=0; row<NUM_ROWS; row++){
+    for(uint8_t col=0; col<NUM_COLS; col++) {
+      cooldown = key_cooldowns[row][col];
+      if(cooldown > 0U) {
+        key_cooldowns[row][col] = cooldown - 1U;
+      }
+    }
+  }
+}
+
+/*
  * \fn void init_keys()
  * \brief initializes the appropraite GPIOs
  * \param bool is_main - true if this device is connected to USB
@@ -269,7 +289,6 @@ bool keymap_main_kbd_set(bool is_main) {
  * \brief populates key_buffer with pressed keys
  */
 void poll_keypresses() {
-  uint8_t key_cooldown = 0;
   uint32_t keys_pressed_by_col[NUM_COLS] = {0};
 
   if(!key_buffer_full()){
@@ -282,54 +301,50 @@ void poll_keypresses() {
 
     for(uint8_t col=0; col<NUM_COLS; col++){
       for(uint8_t row=0; row<NUM_ROWS; row++){
-        key_cooldown = key_cooldowns[row][NUM_COLS - col - 1];
         if(keys_pressed_by_col[col] & row_masks[row]){
-          if(key_cooldown == 0U) {
-            key_cooldowns[row][NUM_COLS - col -1] = KEY_COOLDOWN_MS;
-            if((col == SHIFT_COL) && (row == SHIFT_ROW)){
-              if ((kbd_side_get() == KBDSIDE_RIGHT)
-                  && (!raised_mod_get())
-                  && (!lowered_mod_get())
-              ) {
-                shift_set(true, true);
-              }
-              else {
-                shift_set(true, false);
-              }
-            }
-            else if ((col == MOD_COL) && (row == MOD_ROW)) {
-              if (kbd_side_get() == KBDSIDE_RIGHT) {
-                lowered_mod_set(true);
-              }
-              else {
-                raised_mod_set(true);
-              }
-            }
-            else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
-              if (kbd_side_get() == KBDSIDE_RIGHT) {
-                alt_set(true);
-              }
-              else {
-                gui_set(true);
-              }
-            }
-            else if ((col == CTRL_COL) && (row == CTRL_ROW) && (!raised_mod_get())) {
-              if(kbd_side_get() == KBDSIDE_LEFT) {
-                ctrl_set(true);
-              }
-            }
-
-            if(main_kbd){
-              if (kbd_side_get() == KBDSIDE_RIGHT) {
-                push_keypress(col, row, true);
-              }
-              else {
-                push_keypress(col, row, false);
-              }
+          if((col == SHIFT_COL) && (row == SHIFT_ROW)){
+            if ((kbd_side_get() == KBDSIDE_RIGHT)
+                && (!raised_mod_get())
+                && (!lowered_mod_get())
+            ) {
+              shift_set(true, true);
             }
             else {
-              xboard_comms_send(col, row);
+              shift_set(true, false);
             }
+          }
+          else if ((col == MOD_COL) && (row == MOD_ROW)) {
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
+              lowered_mod_set(true);
+            }
+            else {
+              raised_mod_set(true);
+            }
+          }
+          else if ((col == ALTGUI_COL) && (row == ALTGUI_ROW)) {
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
+              alt_set(true);
+            }
+            else {
+              gui_set(true);
+            }
+          }
+          else if ((col == CTRL_COL) && (row == CTRL_ROW) && (!raised_mod_get())) {
+            if(kbd_side_get() == KBDSIDE_LEFT) {
+              ctrl_set(true);
+            }
+          }
+
+          if(main_kbd){
+            if (kbd_side_get() == KBDSIDE_RIGHT) {
+              push_keypress(col, row, true);
+            }
+            else {
+              push_keypress(col, row, false);
+            }
+          }
+          else {
+            xboard_comms_send(col, row);
           }
         }
         else {
@@ -367,9 +382,6 @@ void poll_keypresses() {
             xboard_comms_send(XBOARD_PKT_INVALID, XBOARD_PKT_INVALID);
           }
         }
-        if(key_cooldown > 0) {
-          key_cooldowns[row][NUM_COLS - col - 1]--;
-        }
       }
     }
   }
@@ -383,31 +395,45 @@ void poll_keypresses() {
  * \param bool is_right_side - push key from the right side
  */
 void push_keypress(uint8_t col, uint8_t row, bool is_right_side){
+  uint8_t key = HID_KEY_NONE;
+  uint8_t lock = key_locks[row][NUM_COLS - 1 - col];
+  uint8_t cooldown = 0;
+
   if(!key_buffer_full()) {
     if(row < 3){
       if(raised_mod_get()){
         if(is_right_side){
-          key_buffer_push(raised_map_r[row][NUM_COLS - 1 - col]);
+          key = raised_map_r[row][NUM_COLS - 1 - col];
         }
         else{
-          key_buffer_push(raised_map_l[row][NUM_COLS - 1 - col]);
+          key = raised_map_l[row][NUM_COLS - 1 - col];
         }
       }
       else if(lowered_mod_get()){
         if(is_right_side){
-          key_buffer_push(lowered_map_r[row][NUM_COLS - 1 - col]);
+          key = lowered_map_r[row][NUM_COLS - 1 - col];
         }
         else{
-          key_buffer_push(lowered_map_l[row][NUM_COLS - 1 - col]);
+          key = lowered_map_l[row][NUM_COLS - 1 - col];
         }
       }
       else{
         if(is_right_side){
-          key_buffer_push(normal_map_r[row][NUM_COLS - 1 - col]);
+          key = normal_map_r[row][NUM_COLS - 1 - col];
         }
         else{
-          key_buffer_push(normal_map_l[row][NUM_COLS - 1 - col]);
+          key = normal_map_l[row][NUM_COLS - 1 - col];
         }
+      }
+
+      if(key == lock){
+        key_buffer_push(key);
+        key_cooldowns[row][NUM_COLS - 1 - col] = KEY_COOLDOWN_MS;
+      }
+      else if ((key_cooldowns[row][NUM_COLS - 1 - col] == 0U) || (lock == HID_KEY_NONE)) {
+        key_buffer_push(key);
+        key_cooldowns[row][NUM_COLS - 1 - col] = KEY_COOLDOWN_MS;
+        key_locks[row][NUM_COLS - 1 - col] = key;
       }
     }
     else{ // mod row. The mod key is handled in the packet information
