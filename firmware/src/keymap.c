@@ -15,7 +15,7 @@
 #include "pinmap.h"
 #include "xboard_comms.h"
 
-#define KEY_COOLDOWN_MS 2
+#define KEY_COOLDOWN_MS 0
 
 static bool main_kbd = false;
 static uint8_t kbd_side = 0U;
