@@ -26,10 +26,6 @@ add_executable(print
 add_executable(xboard_comms
   test/xboard_comms.c
 )
-add_executable(watchdog
-  test/watchdog.c
-)
-
 
 target_compile_options(${PROJECT_NAME} PUBLIC
   -g
@@ -57,10 +53,6 @@ target_compile_options(xboard_comms PUBLIC
   -g
   -O0
 )
-target_compile_options(watchdog PUBLIC
-  -g
-  -O0
-)
 
 target_sources(${PROJECT_NAME} PUBLIC
   src/alarm_utils.c
@@ -72,6 +64,7 @@ target_sources(${PROJECT_NAME} PUBLIC
   src/timing_arch.c
   src/usb_descriptors.c
   src/usb_detect.c
+  src/watchdog.c
   src/xboard_comms.c
 )
 
@@ -119,13 +112,6 @@ target_sources(xboard_comms PUBLIC
   src/usb_detect.c
   src/xboard_comms.c
 )
-target_sources(watchdog PUBLIC
-  src/alarm_utils.c
-  src/led_sm.c
-  src/led_utils.c
-  src/timing_arch.c
-)
-
 
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
 
@@ -135,7 +121,6 @@ target_include_directories(keypress PUBLIC inc)
 target_include_directories(led_blinky PUBLIC inc)
 target_include_directories(print PUBLIC inc)
 target_include_directories(xboard_comms PUBLIC inc)
-target_include_directories(watchdog PUBLIC inc)
 
 target_link_libraries(${PROJECT_NAME}
   pico_stdlib
@@ -188,13 +173,6 @@ target_link_libraries(print
 target_link_libraries(xboard_comms
   tinyusb_device
   tinyusb_board
-  pico_stdlib
-  hardware_regs_headers
-  hardware_structs_headers
-  hardware_timer
-  hardware_irq
-)
-target_link_libraries(watchdog
   pico_stdlib
   hardware_regs_headers
   hardware_structs_headers
