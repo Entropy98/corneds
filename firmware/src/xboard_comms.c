@@ -1,7 +1,7 @@
 /*
  * \file xboard_comms.c
  * \author Harper Weigle
- * \date Jan 18 2024
+ * \date Feb 10 2024
  * \brief interfacing between sides of the keyboard
  */
 
@@ -78,18 +78,18 @@ static void rx_irq(){
         case XBOARD_PKT_MOD_HEADER:
           if(pkt & XBOARD_PKT_ALTGUI_BIT){
             if(kbd_side_get() == KBDSIDE_RIGHT){
-              alt_set(true);
+              gui_set(true);
             }
             else {
-              gui_set(true);
+              alt_set(true);
             }
           }
           else{
             if(kbd_side_get() == KBDSIDE_RIGHT){
-              alt_set(false);
+              gui_set(false);
             }
             else {
-              gui_set(false);
+              alt_set(false);
             }
           }
 
