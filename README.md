@@ -2,6 +2,7 @@
  * PyOCD
  * Pico-SDK
  * gdb-multiarch
+ * gcc-arm-none-eabi
 
 # Flashing
 1. run `./scripts/flash.sh ./build/corneds_<side>.elf` in the firmware directory
