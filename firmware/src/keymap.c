@@ -38,9 +38,9 @@ static volatile bool raised = false;
 static volatile bool lowered = false;
 static volatile bool change_queued = false;
 
-static keymap_t normal_map_r = {{ HID_KEY_Y,    HID_KEY_U,    HID_KEY_I,     HID_KEY_O,      HID_KEY_P,         HID_KEY_BACKSPACE},
-                                { HID_KEY_H,    HID_KEY_J,    HID_KEY_K,     HID_KEY_L,      HID_KEY_SEMICOLON, HID_KEY_APOSTROPHE},
-                                { HID_KEY_N,    HID_KEY_M,    HID_KEY_COMMA, HID_KEY_PERIOD, HID_KEY_SLASH,     HID_KEY_SHIFT_RIGHT}};
+static keymap_t normal_map_r = {{ HID_KEY_J,    HID_KEY_L,    HID_KEY_U,     HID_KEY_Y,      HID_KEY_SEMICOLON, HID_KEY_BACKSPACE},
+                                { HID_KEY_H,    HID_KEY_N,    HID_KEY_E,     HID_KEY_I,      HID_KEY_O,         HID_KEY_APOSTROPHE},
+                                { HID_KEY_K,    HID_KEY_M,    HID_KEY_COMMA, HID_KEY_PERIOD, HID_KEY_SLASH,     HID_KEY_SHIFT_RIGHT}};
 
 static keymap_t raised_map_r = {{ MACRO_CARET,       MACRO_AMPERSAND,       MACRO_ASTRISK, MACRO_PARENTHESIS_LEFT, MACRO_PARENTHESIS_RIGHT, HID_KEY_DELETE},
                                 { HID_KEY_6,         HID_KEY_7,             HID_KEY_8,     HID_KEY_9,              HID_KEY_0,               MACRO_COLON},
@@ -50,8 +50,8 @@ static keymap_t lowered_map_r = {{ HID_KEY_F6,         HID_KEY_F7,         HID_K
                                  { HID_KEY_ARROW_LEFT, HID_KEY_ARROW_DOWN, HID_KEY_ARROW_UP, HID_KEY_ARROW_RIGHT, MACRO_PIPE,   HID_KEY_F11},
                                  { HID_KEY_MINUS,      MACRO_PLUS,         HID_KEY_NONE,     HID_KEY_NONE,        HID_KEY_NONE, HID_KEY_F12}};
 
-static keymap_t normal_map_l = {{ HID_KEY_T, HID_KEY_R, HID_KEY_E, HID_KEY_W, HID_KEY_Q, HID_KEY_ESCAPE},
-                                { HID_KEY_G, HID_KEY_F, HID_KEY_D, HID_KEY_S, HID_KEY_A, HID_KEY_CONTROL_LEFT},
+static keymap_t normal_map_l = {{ HID_KEY_G, HID_KEY_P, HID_KEY_F, HID_KEY_W, HID_KEY_Q, HID_KEY_ESCAPE},
+                                { HID_KEY_D, HID_KEY_T, HID_KEY_S, HID_KEY_R, HID_KEY_A, HID_KEY_CONTROL_LEFT},
                                 { HID_KEY_B, HID_KEY_V, HID_KEY_C, HID_KEY_X, HID_KEY_Z, HID_KEY_SHIFT_LEFT}};
 
 
