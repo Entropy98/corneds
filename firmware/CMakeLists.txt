@@ -6,6 +6,14 @@ project(corneds)
 
 pico_sdk_init()
 
+if(NOT DEFINED KBD_LAYOUT)
+  add_compile_definitions(KBD_LAYOUT_QWERTY=1)
+elseif(KBD_LAYOUT STREQUAL "QWERTY")
+  add_compile_definitions(KBD_LAYOUT_QWERTY=1)
+elseif(KBD_LAYOUT STREQUAL "COLEMAK")
+  add_compile_definitions(KBD_LAYOUT_COLEMAK=1)
+endif()
+
 add_executable(${PROJECT_NAME}
   src/main.c
 )
