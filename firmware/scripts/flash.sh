@@ -6,4 +6,11 @@ then
   exit 1
 fi
 
-pyocd flash -t rp2040 $1 -u E6614103E7632B2F
+if [ -z $2 ]
+then
+  probe_id=""
+else
+  probe_id="-u $2"
+fi
+
+pyocd flash -t rp2040 $1 $probe_id
